@@ -32,6 +32,34 @@
   <title>tg_mini_app</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+    #flutter_container {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      inset: 0;
+    }
+  </style>
+  <script>
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand(); // Развернуть на весь экран
+    tg.enableClosingConfirmation(); // Спрашивать перед закрытием (защита от случайных свайпов)
+    
+    // Фикс для iOS, чтобы не "тянулось" вверх-вниз
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '0';
+    document.body.style.bottom = '0';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

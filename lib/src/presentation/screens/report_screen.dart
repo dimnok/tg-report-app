@@ -63,6 +63,7 @@ class _PositionsList extends ConsumerWidget {
     final report = ref.watch(reportNotifierProvider);
 
     return ListView.separated(
+      physics: const BouncingScrollPhysics(), // Добавляем мягкий скролл
       padding: const EdgeInsets.all(20),
       itemCount: positions.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
