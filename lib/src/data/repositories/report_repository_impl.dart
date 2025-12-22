@@ -10,22 +10,21 @@ class ReportRepositoryImpl implements ReportRepository {
   ReportRepositoryImpl({required this.client, required this.url});
 
   @override
-  Future<List<PositionModel>> getPositions() async {
+  Future<Map<String, dynamic>> getData(String userId) async {
     try {
-      final response = await client.get(Uri.parse(url));
+      final response = await client.get(Uri.parse('$url?userId=$userId'));
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => PositionModel.fromJson(json)).toList();
+        return jsonDecode(response.body);
       } else {
-        throw Exception('Ошибка загрузки позиций: ${response.statusCode}');
+        throw Exception('Ошибка сервера: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Ошибка сети (get): $e');
+      throw Exception('Ошибка сети: $e');
     }
   }
 
   @override
-  Future<void> sendReport(List<PositionModel> items) async {
+  Future<void> sendReport(List<PositionModel> items, String userId) async {
     try {
       final itemsJson = items.map((item) => {
         'id': item.id,
@@ -38,6 +37,7 @@ class ReportRepositoryImpl implements ReportRepository {
         Uri.parse(url),
         body: jsonEncode({
           'items': itemsJson,
+          'userId': userId,
         }),
       );
 
@@ -45,10 +45,8 @@ class ReportRepositoryImpl implements ReportRepository {
         throw Exception('Ошибка отправки: ${response.statusCode}');
       }
     } catch (e) {
-      if (e.toString().contains('Failed to fetch')) {
-        print('CORS: данные ушли.');
-      } else {
-        throw Exception('Ошибка сети (post): $e');
+      if (!e.toString().contains('Failed to fetch')) {
+        throw Exception('Ошибка сети: $e');
       }
     }
   }
