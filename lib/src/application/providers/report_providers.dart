@@ -85,12 +85,14 @@ class ReportNotifier extends Notifier<Map<String, int>> {
 
   /// Изменяет количество позиции на [delta].
   void updateQuantity(String id, int delta) {
-    // ...
+    final current = state[id] ?? 0;
+    final newValue = current + delta;
+    state = {...state, id: newValue >= 0 ? newValue : 0};
   }
 
   /// Устанавливает точное [quantity] для позиции [id].
   void setQuantity(String id, int quantity) {
-    // ...
+    state = {...state, id: quantity >= 0 ? quantity : 0};
   }
 
   /// Сбрасывает текущий отчет.
