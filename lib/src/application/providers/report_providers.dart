@@ -6,15 +6,16 @@ import '../../domain/repositories/report_repository.dart';
 import '../../domain/models/position_model.dart';
 import '../../domain/models/initial_data.dart';
 import '../../domain/models/production_item.dart';
+import '../../domain/models/work_object.dart';
+import '../../domain/models/user_model.dart';
 
 /// Предоставляет Telegram ID текущего пользователя.
 /// В случае отсутствия данных WebApp (например, в браузере), возвращает тестовое значение.
 final userIdProvider = Provider<String>((ref) {
-  // ...
   try {
     final user = telegramWebApp.initDataUnsafe.user;
     if (user != null) {
-      return user.id;
+      return user.id.toString();
     }
   } catch (e) {
     // В случае ошибки (например, запуск не в TG) - возвращаем тестовый ID
@@ -34,8 +35,30 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
 final initialDataProvider = FutureProvider<InitialData>((ref) async {
   final repository = ref.watch(reportRepositoryProvider);
   final userId = ref.watch(userIdProvider);
-  return repository.getData(userId);
+  final selectedObject = ref.watch(selectedObjectProvider);
+
+  return repository.getData(userId, objectId: selectedObject?.id);
 });
+
+/// Провайдер списка пользователей для админа.
+final allUsersProvider = FutureProvider<List<UserModel>>((ref) async {
+  final repository = ref.watch(reportRepositoryProvider);
+  final adminId = ref.watch(userIdProvider);
+  return repository.getUsers(adminId);
+});
+
+/// Управляет текущим выбранным объектом.
+class SelectedObjectNotifier extends Notifier<WorkObject?> {
+  @override
+  WorkObject? build() => null;
+  void select(WorkObject? object) => state = object;
+}
+
+/// Предоставляет текущий выбранный объект.
+final selectedObjectProvider =
+    NotifierProvider<SelectedObjectNotifier, WorkObject?>(
+      SelectedObjectNotifier.new,
+    );
 
 /// Предоставляет данные итоговой выработки.
 final productionDataProvider = FutureProvider<List<ProductionItem>>((
@@ -60,13 +83,12 @@ final searchProvider = NotifierProvider<SearchNotifier, String>(
 
 /// Предоставляет отфильтрованный список позиций на основе поискового запроса.
 final filteredPositionsProvider = Provider<List<PositionModel>>((ref) {
-  // ...
   final dataAsync = ref.watch(initialDataProvider);
   final searchQuery = ref.watch(searchProvider).toLowerCase();
 
   return dataAsync.maybeWhen(
     data: (data) => data.maybeWhen(
-      authorized: (positions, _) {
+      authorized: (positions, objects, name, role) {
         if (searchQuery.isEmpty) return positions;
         return positions
             .where((p) => p.name.toLowerCase().contains(searchQuery))

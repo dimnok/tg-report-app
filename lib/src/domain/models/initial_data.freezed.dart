@@ -150,10 +150,10 @@ return unauthorized(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<PositionModel> positions,  String userName)?  authorized,TResult Function( String userId,  String userName)?  unauthorized,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<PositionModel> positions,  List<WorkObject> objects,  String userName,  String role)?  authorized,TResult Function( String userId,  String userName)?  unauthorized,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AuthorizedData() when authorized != null:
-return authorized(_that.positions,_that.userName);case UnauthorizedData() when unauthorized != null:
+return authorized(_that.positions,_that.objects,_that.userName,_that.role);case UnauthorizedData() when unauthorized != null:
 return unauthorized(_that.userId,_that.userName);case _:
   return orElse();
 
@@ -172,10 +172,10 @@ return unauthorized(_that.userId,_that.userName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<PositionModel> positions,  String userName)  authorized,required TResult Function( String userId,  String userName)  unauthorized,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<PositionModel> positions,  List<WorkObject> objects,  String userName,  String role)  authorized,required TResult Function( String userId,  String userName)  unauthorized,}) {final _that = this;
 switch (_that) {
 case AuthorizedData():
-return authorized(_that.positions,_that.userName);case UnauthorizedData():
+return authorized(_that.positions,_that.objects,_that.userName,_that.role);case UnauthorizedData():
 return unauthorized(_that.userId,_that.userName);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -190,10 +190,10 @@ return unauthorized(_that.userId,_that.userName);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<PositionModel> positions,  String userName)?  authorized,TResult? Function( String userId,  String userName)?  unauthorized,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<PositionModel> positions,  List<WorkObject> objects,  String userName,  String role)?  authorized,TResult? Function( String userId,  String userName)?  unauthorized,}) {final _that = this;
 switch (_that) {
 case AuthorizedData() when authorized != null:
-return authorized(_that.positions,_that.userName);case UnauthorizedData() when unauthorized != null:
+return authorized(_that.positions,_that.objects,_that.userName,_that.role);case UnauthorizedData() when unauthorized != null:
 return unauthorized(_that.userId,_that.userName);case _:
   return null;
 
@@ -206,7 +206,7 @@ return unauthorized(_that.userId,_that.userName);case _:
 
 
 class AuthorizedData implements InitialData {
-  const AuthorizedData({required final  List<PositionModel> positions, required this.userName}): _positions = positions;
+  const AuthorizedData({required final  List<PositionModel> positions, required final  List<WorkObject> objects, required this.userName, this.role = 'user'}): _positions = positions,_objects = objects;
   
 
  final  List<PositionModel> _positions;
@@ -216,7 +216,15 @@ class AuthorizedData implements InitialData {
   return EqualUnmodifiableListView(_positions);
 }
 
+ final  List<WorkObject> _objects;
+ List<WorkObject> get objects {
+  if (_objects is EqualUnmodifiableListView) return _objects;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_objects);
+}
+
 @override final  String userName;
+@JsonKey() final  String role;
 
 /// Create a copy of InitialData
 /// with the given fields replaced by the non-null parameter values.
@@ -228,16 +236,16 @@ $AuthorizedDataCopyWith<AuthorizedData> get copyWith => _$AuthorizedDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthorizedData&&const DeepCollectionEquality().equals(other._positions, _positions)&&(identical(other.userName, userName) || other.userName == userName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthorizedData&&const DeepCollectionEquality().equals(other._positions, _positions)&&const DeepCollectionEquality().equals(other._objects, _objects)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.role, role) || other.role == role));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_positions),userName);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_positions),const DeepCollectionEquality().hash(_objects),userName,role);
 
 @override
 String toString() {
-  return 'InitialData.authorized(positions: $positions, userName: $userName)';
+  return 'InitialData.authorized(positions: $positions, objects: $objects, userName: $userName, role: $role)';
 }
 
 
@@ -248,7 +256,7 @@ abstract mixin class $AuthorizedDataCopyWith<$Res> implements $InitialDataCopyWi
   factory $AuthorizedDataCopyWith(AuthorizedData value, $Res Function(AuthorizedData) _then) = _$AuthorizedDataCopyWithImpl;
 @override @useResult
 $Res call({
- List<PositionModel> positions, String userName
+ List<PositionModel> positions, List<WorkObject> objects, String userName, String role
 });
 
 
@@ -265,10 +273,12 @@ class _$AuthorizedDataCopyWithImpl<$Res>
 
 /// Create a copy of InitialData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? positions = null,Object? userName = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? positions = null,Object? objects = null,Object? userName = null,Object? role = null,}) {
   return _then(AuthorizedData(
 positions: null == positions ? _self._positions : positions // ignore: cast_nullable_to_non_nullable
-as List<PositionModel>,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
+as List<PositionModel>,objects: null == objects ? _self._objects : objects // ignore: cast_nullable_to_non_nullable
+as List<WorkObject>,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
+as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

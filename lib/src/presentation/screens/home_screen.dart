@@ -8,6 +8,7 @@ import '../../domain/models/initial_data.dart';
 import 'report_screen.dart';
 import 'production_screen.dart';
 import 'placeholder_screen.dart';
+import 'admin_screen.dart';
 
 /// Главный стартовый экран приложения.
 ///
@@ -57,75 +58,103 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                formattedDate.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              dataAsync.when(
-                data: (data) {
-                  final name = data.when(
-                    authorized: (_, name) => name,
-                    unauthorized: (_, name) => name,
-                  );
-                  return Text(
-                    'ДОБРЫЙ ДЕНЬ,\n${name.toUpperCase()}!',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                      height: 1.1,
-                    ),
-                  );
-                },
-                loading: () => const Text(
-                  'ЗАГРУЗКА...',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-                ),
-                error: (_, __) => const Text(
-                  'ДОБРЫЙ ДЕНЬ!',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-                ),
-              ),
-              const SizedBox(height: 48),
-              _MenuButton(
-                title: 'ОТЧЁТ',
-                icon: Icons.assignment_rounded,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ReportScreen()),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _MenuButton(
-                title: 'ВЫРАБОТКА',
-                icon: Icons.trending_up_rounded,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProductionScreen()),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _MenuButton(
-                title: 'ТАБЕЛЬ',
-                icon: Icons.calendar_today_rounded,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PlaceholderScreen(title: 'Табель'),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  formattedDate.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                dataAsync.when(
+                  data: (data) {
+                    final name = data.when(
+                      authorized: (positions, objects, name, role) => name,
+                      unauthorized: (_, name) => name,
+                    );
+                    return Text(
+                      'ДОБРЫЙ ДЕНЬ,\n${name.toUpperCase()}!',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
+                    );
+                  },
+                  loading: () => const Text(
+                    'ЗАГРУЗКА...',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                  ),
+                  error: (_, _) => const Text(
+                    'ДОБРЫЙ ДЕНЬ!',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                  ),
+                ),
+                const SizedBox(height: 48),
+                _MenuButton(
+                  title: 'ОТЧЁТ',
+                  icon: Icons.assignment_rounded,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ReportScreen()),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _MenuButton(
+                  title: 'ВЫРАБОТКА',
+                  icon: Icons.trending_up_rounded,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProductionScreen()),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _MenuButton(
+                  title: 'ТАБЕЛЬ',
+                  icon: Icons.calendar_today_rounded,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PlaceholderScreen(title: 'Табель'),
+                    ),
+                  ),
+                ),
+                // Админ-панель
+                dataAsync.maybeWhen(
+                  data: (data) => data.maybeWhen(
+                    authorized: (positions, objects, name, role) {
+                      if (role == 'admin') {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: _MenuButton(
+                            title: 'АДМИН-ПАНЕЛЬ',
+                            icon: Icons.admin_panel_settings_rounded,
+                            isPrimary: true,
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AdminScreen(),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                  orElse: () => const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -137,11 +166,13 @@ class _MenuButton extends StatelessWidget {
   final String title;
   final IconData icon;
   final VoidCallback onPressed;
+  final bool isPrimary;
 
   const _MenuButton({
     required this.title,
     required this.icon,
     required this.onPressed,
+    this.isPrimary = false,
   });
 
   @override
@@ -154,15 +185,19 @@ class _MenuButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          color: isPrimary
+              ? (isDark ? Colors.blueGrey[800] : Colors.blueGrey[50])
+              : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+            color: isPrimary
+                ? (isDark ? Colors.blueGrey[600]! : Colors.blueGrey[200]!)
+                : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
           ),
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -170,21 +205,32 @@ class _MenuButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 28, color: isDark ? Colors.white : Colors.black),
+            Icon(
+              icon,
+              size: 28,
+              color: isPrimary
+                  ? (isDark ? Colors.blue[200] : Colors.blue[700])
+                  : (isDark ? Colors.white : Colors.black),
+            ),
             const SizedBox(width: 20),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
+                color: isPrimary
+                    ? (isDark ? Colors.blue[100] : Colors.blue[900])
+                    : (isDark ? Colors.white : Colors.black),
               ),
             ),
             const Spacer(),
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
+              color: isPrimary
+                  ? (isDark ? Colors.blue[200] : Colors.blue[700])
+                  : (isDark ? Colors.grey[600] : Colors.grey[400]),
             ),
           ],
         ),

@@ -24,11 +24,19 @@ class _SubmitButtonState extends ConsumerState<SubmitButton> {
 
   Future<void> _submitReport() async {
     final dataAsync = ref.read(initialDataProvider);
+    final selectedObject = ref.read(selectedObjectProvider);
+
+    if (selectedObject == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пожалуйста, выберите объект')),
+      );
+      return;
+    }
 
     // Используем типизированную проверку через InitialData
     final selectedItems = dataAsync.maybeWhen(
       data: (data) => data.maybeWhen(
-        authorized: (positions, _) {
+        authorized: (positions, objects, name, role) {
           final items = <PositionModel>[];
           widget.report.forEach((id, qty) {
             if (qty > 0) {
@@ -47,9 +55,12 @@ class _SubmitButtonState extends ConsumerState<SubmitButton> {
 
     setState(() => _isSending = true);
     try {
-      await ref
-          .read(reportRepositoryProvider)
-          .sendReport(selectedItems, widget.userId);
+      await ref.read(reportRepositoryProvider).sendReport(
+            items: selectedItems,
+            userId: widget.userId,
+            objectId: selectedObject.id,
+            objectName: selectedObject.name,
+          );
       ref.read(reportNotifierProvider.notifier).reset();
       if (mounted) _showSuccessSheet();
     } catch (e) {

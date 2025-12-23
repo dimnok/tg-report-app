@@ -3,32 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/report_providers.dart';
 import '../../application/providers/theme_provider.dart';
 import '../../domain/models/initial_data.dart';
+import '../../domain/models/work_object.dart';
 import '../widgets/access_denied_screen.dart';
 import '../widgets/search_field.dart';
 import '../widgets/positions_list.dart';
 import '../widgets/submit_button.dart';
 
 /// Главный экран приложения для формирования и отправки отчетов.
-///
-/// Отвечает за:
-/// * Переключение темы (светлая/темная).
-/// * Первичную загрузку данных и проверку доступа.
-/// * Отображение списка позиций или экрана отказа в доступе.
 class ReportScreen extends ConsumerWidget {
   const ReportScreen({super.key});
 
   @override
-  // ...
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(initialDataProvider);
     final themeMode = ref.watch(themeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedObject = ref.watch(selectedObjectProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('ОТЧЕТ'),
+        title: Text(selectedObject?.name.toUpperCase() ?? 'ОТЧЕТ'),
         actions: [
+          if (selectedObject != null)
+            IconButton(
+              icon: const Icon(Icons.edit_location_alt_rounded, size: 20),
+              onPressed: () =>
+                  ref.read(selectedObjectProvider.notifier).select(null),
+            ),
           IconButton(
             icon: Icon(
               themeMode == ThemeMode.dark
@@ -47,7 +49,12 @@ class ReportScreen extends ConsumerWidget {
       ),
       body: dataAsync.when(
         data: (data) => data.when(
-          authorized: (_, _) => const _MainContent(),
+          authorized: (positions, objects, userName, role) {
+            if (selectedObject == null) {
+              return _ObjectSelection(objects: objects);
+            }
+            return const _MainContent();
+          },
           unauthorized: (userId, userName) =>
               AccessDeniedScreen(userId: userId, userName: userName),
         ),
@@ -59,6 +66,79 @@ class ReportScreen extends ConsumerWidget {
         ),
         error: (error, stack) => _ErrorView(error: error),
       ),
+    );
+  }
+}
+
+class _ObjectSelection extends ConsumerWidget {
+  final List<WorkObject> objects;
+  const _ObjectSelection({required this.objects});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Text(
+            'ВЫБЕРИТЕ ОБЪЕКТ',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: objects.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final object = objects[index];
+              return InkWell(
+                onTap: () =>
+                    ref.read(selectedObjectProvider.notifier).select(object),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.business_rounded,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          object.name.toUpperCase(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 14, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
