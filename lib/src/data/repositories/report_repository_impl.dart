@@ -78,16 +78,19 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<void> sendReport(List<PositionModel> items, String userId) async {
     try {
-      final itemsJson = items.map((item) => {
-        'id': item.id,
-        'name': item.name,
-        'qty': item.quantity,
-        'unit': item.unit,
-      }).toList();
+      final itemsJson = items
+          .map((item) => {
+                'id': item.id,
+                'name': item.name,
+                'qty': item.quantity,
+                'unit': item.unit,
+              })
+          .toList();
 
       final response = await client.post(
         Uri.parse(url),
         body: jsonEncode({
+          'action': 'sendReport',
           'items': itemsJson,
           'userId': userId,
         }),
@@ -100,6 +103,31 @@ class ReportRepositoryImpl implements ReportRepository {
       if (!e.toString().contains('Failed to fetch')) {
         throw Exception('Ошибка сети: $e');
       }
+    }
+  }
+
+  @override
+  Future<void> sendExcelToTelegram(
+    List<int> bytes,
+    String fileName,
+    String userId,
+  ) async {
+    try {
+      final response = await client.post(
+        Uri.parse(url),
+        body: jsonEncode({
+          'action': 'sendExcel',
+          'fileBytes': base64Encode(bytes),
+          'fileName': fileName,
+          'userId': userId,
+        }),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 302) {
+        throw Exception('Ошибка отправки файла: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка сети при отправке файла: $e');
     }
   }
 }

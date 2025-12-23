@@ -13,4 +13,11 @@ abstract class ReportRepository {
 
   /// Отправляет список выбранных позиций [items] от имени пользователя [userId].
   Future<void> sendReport(List<PositionModel> items, String userId);
+
+  /// Отправляет сформированный Excel-файл [bytes] пользователю [userId] через Telegram.
+  Future<void> sendExcelToTelegram(
+    List<int> bytes,
+    String fileName,
+    String userId,
+  );
 }

@@ -5,12 +5,42 @@ import '../../application/providers/theme_provider.dart';
 import '../../application/utils/excel_exporter.dart';
 import '../../domain/models/production_item.dart';
 
-/// Экран отображения итоговой выработки по позициям за все время.
-class ProductionScreen extends ConsumerWidget {
+class ProductionScreen extends ConsumerStatefulWidget {
   const ProductionScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductionScreen> createState() => _ProductionScreenState();
+}
+
+class _ProductionScreenState extends ConsumerState<ProductionScreen> {
+  bool _isExporting = false;
+
+  Future<void> _exportToTelegram(List<ProductionItem> items) async {
+    setState(() => _isExporting = true);
+    try {
+      await ExcelExporter.exportProduction(
+        items: items,
+        userId: ref.read(userIdProvider),
+        repository: ref.read(reportRepositoryProvider),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Файл отправлен вам в личные сообщения')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка экспорта: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final productionAsync = ref.watch(productionDataProvider);
     final themeMode = ref.watch(themeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -22,11 +52,17 @@ class ProductionScreen extends ConsumerWidget {
         actions: [
           productionAsync.maybeWhen(
             data: (items) => IconButton(
-              icon: const Icon(Icons.file_download_rounded, size: 22),
-              tooltip: 'Экспорт в Excel',
-              onPressed: items.isEmpty 
-                ? null 
-                : () => ExcelExporter.exportProduction(items),
+              icon: _isExporting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send_to_mobile_rounded, size: 22),
+              tooltip: 'Отправить в Telegram',
+              onPressed: (items.isEmpty || _isExporting)
+                  ? null
+                  : () => _exportToTelegram(items),
             ),
             orElse: () => const SizedBox.shrink(),
           ),
@@ -47,6 +83,7 @@ class ProductionScreen extends ConsumerWidget {
         ],
       ),
       body: productionAsync.when(
+// ...
         data: (items) {
           if (items.isEmpty) {
             return const Center(
