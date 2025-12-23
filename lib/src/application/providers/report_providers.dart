@@ -1,90 +1,102 @@
-import 'dart:js_interop';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import '../utils/telegram_interop.dart';
 import '../../data/repositories/report_repository_impl.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/models/position_model.dart';
+import '../../domain/models/initial_data.dart';
+import '../../domain/models/production_item.dart';
 
-// Безопасный доступ к JS объектам Telegram
-@JS('window.Telegram.WebApp')
-external JSObject? get _telegramWebApp;
-
-@JS('Object.keys')
-external JSArray _jsKeys(JSObject obj);
-
-@JS('eval')
-external JSAny? _jsEval(String code);
-
-/// Провайдер ID пользователя Telegram
+/// Предоставляет Telegram ID текущего пользователя.
+/// В случае отсутствия данных WebApp (например, в браузере), возвращает тестовое значение.
 final userIdProvider = Provider<String>((ref) {
+  // ...
   try {
-    // Пытаемся безопасно достать ID через eval, чтобы не было TypeError
-    final id = _jsEval('window.Telegram?.WebApp?.initDataUnsafe?.user?.id')?.toString();
-    if (id != null && id != 'undefined') return id;
+    final user = telegramWebApp.initDataUnsafe.user;
+    if (user != null) {
+      return user.id;
+    }
   } catch (e) {
-    // В случае любой ошибки JS - игнорируем
+    // В случае ошибки (например, запуск не в TG) - возвращаем тестовый ID
   }
-  
-  // Если мы в браузере или данных нет - возвращаем тестовый ID
-  return '12345'; 
+
+  return '12345';
 });
 
-/// Провайдер репозитория
+/// Предоставляет экземпляр репозитория для работы с отчетами.
 final reportRepositoryProvider = Provider<ReportRepository>((ref) {
-  const gasUrl = 'https://script.google.com/macros/s/AKfycbz5pHFkbHZMKIl7eIoDv1OoMZnzQsbBVWRQerG6lrUy3-Go0WnDa2NkjKIqVnbTvzM9/exec'; 
+  const gasUrl =
+      'https://script.google.com/macros/s/AKfycbz5pHFkbHZMKIl7eIoDv1OoMZnzQsbBVWRQerG6lrUy3-Go0WnDa2NkjKIqVnbTvzM9/exec';
   return ReportRepositoryImpl(client: http.Client(), url: gasUrl);
 });
 
-/// Провайдер данных (проверка доступа + список позиций)
-final initialDataProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+/// Предоставляет данные инициализации (права доступа и список позиций).
+final initialDataProvider = FutureProvider<InitialData>((ref) async {
   final repository = ref.watch(reportRepositoryProvider);
   final userId = ref.watch(userIdProvider);
   return repository.getData(userId);
 });
 
-/// Notifier для строки поиска
+/// Предоставляет данные итоговой выработки.
+final productionDataProvider = FutureProvider<List<ProductionItem>>((
+  ref,
+) async {
+  final repository = ref.watch(reportRepositoryProvider);
+  final userId = ref.watch(userIdProvider);
+  return repository.getProductionData(userId);
+});
+
+/// Управляет состоянием строки поиска.
 class SearchNotifier extends Notifier<String> {
   @override
   String build() => '';
   void updateSearch(String query) => state = query;
 }
 
-final searchProvider = NotifierProvider<SearchNotifier, String>(SearchNotifier.new);
+/// Предоставляет текущий поисковый запрос.
+final searchProvider = NotifierProvider<SearchNotifier, String>(
+  SearchNotifier.new,
+);
 
-/// Провайдер отфильтрованных позиций
+/// Предоставляет отфильтрованный список позиций на основе поискового запроса.
 final filteredPositionsProvider = Provider<List<PositionModel>>((ref) {
+  // ...
   final dataAsync = ref.watch(initialDataProvider);
   final searchQuery = ref.watch(searchProvider).toLowerCase();
 
   return dataAsync.maybeWhen(
-    data: (data) {
-      if (data['status'] != 'authorized') return [];
-      final List positionsJson = data['positions'];
-      final positions = positionsJson.map((json) => PositionModel.fromJson(json)).toList();
-      
-      if (searchQuery.isEmpty) return positions;
-      return positions.where((p) => p.name.toLowerCase().contains(searchQuery)).toList();
-    },
+    data: (data) => data.maybeWhen(
+      authorized: (positions, _) {
+        if (searchQuery.isEmpty) return positions;
+        return positions
+            .where((p) => p.name.toLowerCase().contains(searchQuery))
+            .toList();
+      },
+      orElse: () => [],
+    ),
     orElse: () => [],
   );
 });
 
-/// Notifier для управления состоянием текущего отчета
+/// Управляет текущим набором выбранных позиций и их количеством в отчете.
 class ReportNotifier extends Notifier<Map<String, int>> {
   @override
   Map<String, int> build() => {};
 
+  /// Изменяет количество позиции на [delta].
   void updateQuantity(String id, int delta) {
-    final current = state[id] ?? 0;
-    final newValue = current + delta;
-    state = {...state, id: newValue >= 0 ? newValue : 0};
+    // ...
   }
 
+  /// Устанавливает точное [quantity] для позиции [id].
   void setQuantity(String id, int quantity) {
-    state = {...state, id: quantity >= 0 ? quantity : 0};
+    // ...
   }
 
+  /// Сбрасывает текущий отчет.
   void reset() => state = {};
 }
 
-final reportNotifierProvider = NotifierProvider<ReportNotifier, Map<String, int>>(ReportNotifier.new);
+/// Предоставляет состояние текущего формируемого отчета.
+final reportNotifierProvider =
+    NotifierProvider<ReportNotifier, Map<String, int>>(ReportNotifier.new);

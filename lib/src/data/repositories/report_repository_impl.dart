@@ -1,20 +1,72 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import '../../domain/models/initial_data.dart';
 import '../../domain/models/position_model.dart';
+import '../../domain/models/production_item.dart';
 import '../../domain/repositories/report_repository.dart';
 
+/// Реализация [ReportRepository] для работы с Google Apps Script (GAS) через HTTP.
 class ReportRepositoryImpl implements ReportRepository {
+  /// HTTP-клиент для запросов.
   final http.Client client;
+  /// Базовый URL скрипта GAS.
   final String url;
 
   ReportRepositoryImpl({required this.client, required this.url});
 
   @override
-  Future<Map<String, dynamic>> getData(String userId) async {
+  Future<InitialData> getData(String userId) async {
     try {
       final response = await client.get(Uri.parse('$url?userId=$userId'));
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        
+        final String status = data['status'] ?? 'unauthorized';
+        final String userName = data['userName'] ?? 'Гость';
+
+        if (status == 'authorized') {
+          final List positionsJson = data['positions'] ?? [];
+          final positions = positionsJson
+              .map((json) => PositionModel.fromJson(json))
+              .toList();
+          
+          return InitialData.authorized(
+            positions: positions,
+            userName: userName,
+          );
+        } else {
+          return InitialData.unauthorized(
+            userId: userId,
+            userName: userName,
+          );
+        }
+      } else {
+        throw Exception('Ошибка сервера: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка сети: $e');
+    }
+  }
+
+  @override
+  Future<List<ProductionItem>> getProductionData(String userId) async {
+    try {
+      final response = await client.get(
+        Uri.parse('$url?userId=$userId&action=getProduction'),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          final List productionJson = data['data'] ?? [];
+          return productionJson
+              .map((json) => ProductionItem.fromJson(json))
+              .toList();
+        } else {
+          final message = data['message'] ?? 'Ошибка получения выработки';
+          debugPrint('GAS Error: $message');
+          throw Exception(message);
+        }
       } else {
         throw Exception('Ошибка сервера: ${response.statusCode}');
       }

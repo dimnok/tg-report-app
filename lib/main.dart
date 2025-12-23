@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'src/presentation/screens/report_screen.dart';
+import 'src/presentation/screens/home_screen.dart';
 import 'src/application/providers/theme_provider.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
+/// Корневой виджет приложения.
+///
+/// Настраивает глобальную конфигурацию тем (светлая/темная) и
+/// устанавливает [HomeScreen] в качестве стартового экрана.
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
@@ -53,7 +53,9 @@ class MyApp extends ConsumerWidget {
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
         ),
@@ -73,9 +75,8 @@ class MyApp extends ConsumerWidget {
         colorScheme: const ColorScheme.dark(
           primary: Colors.white,
           onPrimary: Colors.black,
-          surface: Color(0xFF1A1A1A),
+          surface: Colors.black,
           onSurface: Colors.white,
-          background: Colors.black,
         ),
         scaffoldBackgroundColor: Colors.black,
         appBarTheme: const AppBarTheme(
@@ -95,7 +96,9 @@ class MyApp extends ConsumerWidget {
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
             minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
         ),
@@ -108,7 +111,7 @@ class MyApp extends ConsumerWidget {
           color: const Color(0xFF1A1A1A),
         ),
       ),
-      home: const ReportScreen(),
+      home: const HomeScreen(),
     );
   }
 }

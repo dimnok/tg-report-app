@@ -15,7 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PositionModel {
 
- String get id; String get name; String get unit; int get quantity;
+/// Уникальный идентификатор позиции.
+ String get id;/// Наименование позиции.
+ String get name;/// Единица измерения (шт, кг, и т.д.).
+ String get unit;/// Количество (используется при формировании отчета).
+ int get quantity;
 /// Create a copy of PositionModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -215,9 +219,13 @@ class _PositionModel implements PositionModel {
   const _PositionModel({required this.id, required this.name, required this.unit, this.quantity = 0});
   factory _PositionModel.fromJson(Map<String, dynamic> json) => _$PositionModelFromJson(json);
 
+/// Уникальный идентификатор позиции.
 @override final  String id;
+/// Наименование позиции.
 @override final  String name;
+/// Единица измерения (шт, кг, и т.д.).
 @override final  String unit;
+/// Количество (используется при формировании отчета).
 @override@JsonKey() final  int quantity;
 
 /// Create a copy of PositionModel
