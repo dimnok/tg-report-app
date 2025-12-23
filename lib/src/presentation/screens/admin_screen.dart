@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/report_providers.dart';
 import '../../domain/models/user_model.dart';
+import 'economy_screen.dart';
 
 class AdminScreen extends ConsumerWidget {
   const AdminScreen({super.key});
@@ -12,8 +13,16 @@ class AdminScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ'),
+        title: const Text('УПРАВЛЕНИЕ'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined),
+            tooltip: 'Экономика',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EconomyScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(allUsersProvider),

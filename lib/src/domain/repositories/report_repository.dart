@@ -2,6 +2,7 @@ import '../models/initial_data.dart';
 import '../models/position_model.dart';
 import '../models/production_item.dart';
 import '../models/user_model.dart';
+import '../models/economy_model.dart';
 
 /// Интерфейс для работы с данными отчетов и авторизацией.
 abstract class ReportRepository {
@@ -50,4 +51,7 @@ abstract class ReportRepository {
     required String adminId,
     required UserModel user,
   });
+
+  /// АДМИН: Получает данные для раздела экономики.
+  Future<List<ContractorEconomy>> getEconomyData(String adminId);
 }

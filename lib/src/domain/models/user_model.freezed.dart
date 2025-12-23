@@ -213,14 +213,14 @@ return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);ca
 @JsonSerializable()
 
 class _UserModel implements UserModel {
-  const _UserModel({required this.id, required this.name, required this.status, required this.contractor, required this.role});
+  const _UserModel({this.id = '', this.name = 'Без имени', this.status = 'blocked', this.contractor = 'Без подрядчика', this.role = 'user'});
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
-@override final  String id;
-@override final  String name;
-@override final  String status;
-@override final  String contractor;
-@override final  String role;
+@override@JsonKey() final  String id;
+@override@JsonKey() final  String name;
+@override@JsonKey() final  String status;
+@override@JsonKey() final  String contractor;
+@override@JsonKey() final  String role;
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.

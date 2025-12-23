@@ -6,13 +6,13 @@ part 'user_model.g.dart';
 @freezed
 abstract class UserModel with _$UserModel {
   const factory UserModel({
-    required String id,
-    required String name,
-    required String status,
-    required String contractor,
-    required String role,
+    @Default('') String id,
+    @Default('Без имени') String name,
+    @Default('blocked') String status,
+    @Default('Без подрядчика') String contractor,
+    @Default('user') String role,
   }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
 }
-

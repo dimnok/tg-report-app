@@ -6,6 +6,7 @@ import '../../domain/models/position_model.dart';
 import '../../domain/models/production_item.dart';
 import '../../domain/models/work_object.dart';
 import '../../domain/models/user_model.dart';
+import '../../domain/models/economy_model.dart';
 import '../../domain/repositories/report_repository.dart';
 
 /// Реализация [ReportRepository] для работы с Google Apps Script (GAS) через HTTP.
@@ -235,6 +236,30 @@ class ReportRepositoryImpl implements ReportRepository {
       );
       if (response.statusCode != 200 && response.statusCode != 302) {
         throw Exception('Ошибка добавления пользователя: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка сети: $e');
+    }
+  }
+
+  @override
+  Future<List<ContractorEconomy>> getEconomyData(String adminId) async {
+    try {
+      final response = await client.get(
+        Uri.parse('$url?userId=$adminId&action=getEconomy'),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          final List economyJson = data['economy'] ?? [];
+          return economyJson
+              .map((json) => ContractorEconomy.fromJson(json))
+              .toList();
+        } else {
+          throw Exception(data['message'] ?? 'Ошибка получения данных экономики');
+        }
+      } else {
+        throw Exception('Ошибка сервера: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Ошибка сети: $e');

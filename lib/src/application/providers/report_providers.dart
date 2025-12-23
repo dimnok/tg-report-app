@@ -8,6 +8,7 @@ import '../../domain/models/initial_data.dart';
 import '../../domain/models/production_item.dart';
 import '../../domain/models/work_object.dart';
 import '../../domain/models/user_model.dart';
+import '../../domain/models/economy_model.dart';
 
 /// Предоставляет Telegram ID текущего пользователя.
 /// В случае отсутствия данных WebApp (например, в браузере), возвращает тестовое значение.
@@ -45,6 +46,15 @@ final allUsersProvider = FutureProvider<List<UserModel>>((ref) async {
   final repository = ref.watch(reportRepositoryProvider);
   final adminId = ref.watch(userIdProvider);
   return repository.getUsers(adminId);
+});
+
+/// Провайдер данных экономики для админа.
+final economyDataProvider = FutureProvider<List<ContractorEconomy>>((
+  ref,
+) async {
+  final repository = ref.watch(reportRepositoryProvider);
+  final adminId = ref.watch(userIdProvider);
+  return repository.getEconomyData(adminId);
 });
 
 /// Управляет текущим выбранным объектом.
