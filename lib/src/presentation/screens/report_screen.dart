@@ -19,17 +19,31 @@ class ReportScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedObject = ref.watch(selectedObjectProvider);
+    final selectedSystem = ref.watch(selectedSystemProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(selectedObject?.name.toUpperCase() ?? 'ОТЧЕТ'),
+        title: Text(
+          selectedSystem?.toUpperCase() ??
+              (selectedObject?.name.toUpperCase() ?? 'ОТЧЕТ'),
+        ),
         actions: [
           if (selectedObject != null)
             IconButton(
-              icon: const Icon(Icons.edit_location_alt_rounded, size: 20),
-              onPressed: () =>
-                  ref.read(selectedObjectProvider.notifier).select(null),
+              icon: Icon(
+                selectedSystem != null
+                    ? Icons.account_tree_rounded
+                    : Icons.edit_location_alt_rounded,
+                size: 20,
+              ),
+              onPressed: () {
+                if (selectedSystem != null) {
+                  ref.read(selectedSystemProvider.notifier).select(null);
+                } else {
+                  ref.read(selectedObjectProvider.notifier).select(null);
+                }
+              },
             ),
           IconButton(
             icon: Icon(
@@ -53,6 +67,9 @@ class ReportScreen extends ConsumerWidget {
             if (selectedObject == null) {
               return _ObjectSelection(objects: objects);
             }
+            if (selectedSystem == null) {
+              return const _SystemSelection();
+            }
             return const _MainContent();
           },
           unauthorized: (userId, userName) =>
@@ -66,6 +83,151 @@ class ReportScreen extends ConsumerWidget {
         ),
         error: (error, stack) => _ErrorView(error: error),
       ),
+    );
+  }
+}
+
+class _SystemSelection extends ConsumerWidget {
+  const _SystemSelection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final systems = ref.watch(availableSystemsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final report = ref.watch(reportNotifierProvider);
+    final dataAsync = ref.watch(initialDataProvider);
+
+    // Подсчет количества выбранных позиций в каждой системе
+    Map<String, int> systemCounts = {};
+    dataAsync.maybeWhen(
+      data: (data) => data.maybeWhen(
+        authorized: (positions, objects, name, role) {
+          for (var system in systems) {
+            int count = 0;
+            for (var pos in positions) {
+              if (pos.system == system && (report[pos.id] ?? 0) > 0) {
+                count++;
+              }
+            }
+            systemCounts[system] = count;
+          }
+        },
+        orElse: () {},
+      ),
+      orElse: () {},
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Text(
+            'ВЫБЕРИТЕ СИСТЕМУ',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        Expanded(
+          child: systems.isEmpty
+              ? const Center(child: Text('Нет доступных систем'))
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: systems.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final system = systems[index];
+                    final count = systemCounts[system] ?? 0;
+
+                    return InkWell(
+                      onTap: () => ref
+                          .read(selectedSystemProvider.notifier)
+                          .select(system),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color:
+                              isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: count > 0
+                                ? (isDark ? Colors.white : Colors.black)
+                                : (isDark
+                                    ? Colors.grey[800]!
+                                    : Colors.grey[200]!),
+                            width: count > 0 ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.account_tree_rounded,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                system.toUpperCase(),
+                                style: TextStyle(
+                                  fontWeight: count > 0
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            if (count > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.white : Colors.black,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  count.toString(),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.black : Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_ios_rounded,
+                                size: 14, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        if (report.values.any((qty) => qty > 0))
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? Colors.grey[900]! : Colors.grey[100]!,
+                ),
+              ),
+            ),
+            child: SubmitButton(
+              report: report,
+              userId: ref.watch(userIdProvider),
+            ),
+          ),
+      ],
     );
   }
 }

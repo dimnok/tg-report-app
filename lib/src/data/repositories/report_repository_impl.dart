@@ -103,6 +103,7 @@ class ReportRepositoryImpl implements ReportRepository {
                 'name': item.name,
                 'qty': item.quantity,
                 'unit': item.unit,
+                'system': item.system,
               })
           .toList();
 

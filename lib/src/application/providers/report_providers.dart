@@ -70,6 +70,43 @@ final selectedObjectProvider =
       SelectedObjectNotifier.new,
     );
 
+/// Управляет текущей выбранной системой.
+class SelectedSystemNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    // Сбрасываем систему при смене объекта
+    ref.watch(selectedObjectProvider);
+    return null;
+  }
+  void select(String? system) => state = system;
+}
+
+/// Предоставляет текущую выбранную систему.
+final selectedSystemProvider =
+    NotifierProvider<SelectedSystemNotifier, String?>(
+      SelectedSystemNotifier.new,
+    );
+
+/// Предоставляет список уникальных систем для выбранного объекта.
+final availableSystemsProvider = Provider<List<String>>((ref) {
+  final dataAsync = ref.watch(initialDataProvider);
+  return dataAsync.maybeWhen(
+    data: (data) => data.maybeWhen(
+      authorized: (positions, objects, name, role) {
+        final systems = positions
+            .map((p) => p.system)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
+        systems.sort();
+        return systems;
+      },
+      orElse: () => [],
+    ),
+    orElse: () => [],
+  );
+});
+
 /// Предоставляет данные итоговой выработки.
 final productionDataProvider = FutureProvider<List<ProductionItem>>((
   ref,
@@ -95,14 +132,26 @@ final searchProvider = NotifierProvider<SearchNotifier, String>(
 final filteredPositionsProvider = Provider<List<PositionModel>>((ref) {
   final dataAsync = ref.watch(initialDataProvider);
   final searchQuery = ref.watch(searchProvider).toLowerCase();
+  final selectedSystem = ref.watch(selectedSystemProvider);
 
   return dataAsync.maybeWhen(
     data: (data) => data.maybeWhen(
       authorized: (positions, objects, name, role) {
-        if (searchQuery.isEmpty) return positions;
-        return positions
-            .where((p) => p.name.toLowerCase().contains(searchQuery))
-            .toList();
+        var result = positions;
+        
+        // Фильтр по системе
+        if (selectedSystem != null) {
+          result = result.where((p) => p.system == selectedSystem).toList();
+        }
+        
+        // Фильтр по поиску
+        if (searchQuery.isNotEmpty) {
+          result = result
+              .where((p) => p.name.toLowerCase().contains(searchQuery))
+              .toList();
+        }
+        
+        return result;
       },
       orElse: () => [],
     ),

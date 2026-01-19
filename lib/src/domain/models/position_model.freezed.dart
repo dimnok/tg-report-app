@@ -18,7 +18,8 @@ mixin _$PositionModel {
 /// Уникальный идентификатор позиции.
  String get id;/// Наименование позиции.
  String get name;/// Единица измерения (шт, кг, и т.д.).
- String get unit;/// Количество (используется при формировании отчета).
+ String get unit;/// Система, к которой относится позиция.
+ String get system;/// Количество (используется при формировании отчета).
  int get quantity;
 /// Create a copy of PositionModel
 /// with the given fields replaced by the non-null parameter values.
@@ -32,16 +33,16 @@ $PositionModelCopyWith<PositionModel> get copyWith => _$PositionModelCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PositionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PositionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.system, system) || other.system == system)&&(identical(other.quantity, quantity) || other.quantity == quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unit,quantity);
+int get hashCode => Object.hash(runtimeType,id,name,unit,system,quantity);
 
 @override
 String toString() {
-  return 'PositionModel(id: $id, name: $name, unit: $unit, quantity: $quantity)';
+  return 'PositionModel(id: $id, name: $name, unit: $unit, system: $system, quantity: $quantity)';
 }
 
 
@@ -52,7 +53,7 @@ abstract mixin class $PositionModelCopyWith<$Res>  {
   factory $PositionModelCopyWith(PositionModel value, $Res Function(PositionModel) _then) = _$PositionModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String unit, int quantity
+ String id, String name, String unit, String system, int quantity
 });
 
 
@@ -69,11 +70,12 @@ class _$PositionModelCopyWithImpl<$Res>
 
 /// Create a copy of PositionModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? quantity = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? system = null,Object? quantity = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
+as String,system: null == system ? _self.system : system // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  String system,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PositionModel() when $default != null:
-return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
+return $default(_that.id,_that.name,_that.unit,_that.system,_that.quantity);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  int quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  String system,  int quantity)  $default,) {final _that = this;
 switch (_that) {
 case _PositionModel():
-return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
+return $default(_that.id,_that.name,_that.unit,_that.system,_that.quantity);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String unit,  int quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String unit,  String system,  int quantity)?  $default,) {final _that = this;
 switch (_that) {
 case _PositionModel() when $default != null:
-return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
+return $default(_that.id,_that.name,_that.unit,_that.system,_that.quantity);case _:
   return null;
 
 }
@@ -216,7 +218,7 @@ return $default(_that.id,_that.name,_that.unit,_that.quantity);case _:
 @JsonSerializable()
 
 class _PositionModel implements PositionModel {
-  const _PositionModel({required this.id, required this.name, required this.unit, this.quantity = 0});
+  const _PositionModel({required this.id, required this.name, required this.unit, this.system = '', this.quantity = 0});
   factory _PositionModel.fromJson(Map<String, dynamic> json) => _$PositionModelFromJson(json);
 
 /// Уникальный идентификатор позиции.
@@ -225,6 +227,8 @@ class _PositionModel implements PositionModel {
 @override final  String name;
 /// Единица измерения (шт, кг, и т.д.).
 @override final  String unit;
+/// Система, к которой относится позиция.
+@override@JsonKey() final  String system;
 /// Количество (используется при формировании отчета).
 @override@JsonKey() final  int quantity;
 
@@ -241,16 +245,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PositionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PositionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.system, system) || other.system == system)&&(identical(other.quantity, quantity) || other.quantity == quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unit,quantity);
+int get hashCode => Object.hash(runtimeType,id,name,unit,system,quantity);
 
 @override
 String toString() {
-  return 'PositionModel(id: $id, name: $name, unit: $unit, quantity: $quantity)';
+  return 'PositionModel(id: $id, name: $name, unit: $unit, system: $system, quantity: $quantity)';
 }
 
 
@@ -261,7 +265,7 @@ abstract mixin class _$PositionModelCopyWith<$Res> implements $PositionModelCopy
   factory _$PositionModelCopyWith(_PositionModel value, $Res Function(_PositionModel) _then) = __$PositionModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String unit, int quantity
+ String id, String name, String unit, String system, int quantity
 });
 
 
@@ -278,11 +282,12 @@ class __$PositionModelCopyWithImpl<$Res>
 
 /// Create a copy of PositionModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? quantity = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? system = null,Object? quantity = null,}) {
   return _then(_PositionModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
+as String,system: null == system ? _self.system : system // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));

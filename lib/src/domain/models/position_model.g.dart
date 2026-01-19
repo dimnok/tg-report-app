@@ -11,6 +11,7 @@ _PositionModel _$PositionModelFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       unit: json['unit'] as String,
+      system: json['system'] as String? ?? '',
       quantity: (json['quantity'] as num?)?.toInt() ?? 0,
     );
 
@@ -19,5 +20,6 @@ Map<String, dynamic> _$PositionModelToJson(_PositionModel instance) =>
       'id': instance.id,
       'name': instance.name,
       'unit': instance.unit,
+      'system': instance.system,
       'quantity': instance.quantity,
     };

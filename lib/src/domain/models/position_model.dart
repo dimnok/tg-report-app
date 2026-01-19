@@ -13,6 +13,8 @@ abstract class PositionModel with _$PositionModel {
     required String name,
     /// Единица измерения (шт, кг, и т.д.).
     required String unit,
+    /// Система, к которой относится позиция.
+    @Default('') String system,
     /// Количество (используется при формировании отчета).
     @Default(0) int quantity,
   }) = _PositionModel;
