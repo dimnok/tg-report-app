@@ -266,4 +266,12 @@ class ReportRepositoryImpl implements ReportRepository {
       throw Exception('Ошибка сети: $e');
     }
   }
+
+  @override
+  Future<void> sendTestReport({
+    required String content,
+    required String userId,
+  }) {
+    throw UnimplementedError('Тестовый отчет работает только через Supabase');
+  }
 }

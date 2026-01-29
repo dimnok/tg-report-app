@@ -39,12 +39,15 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
   if (!SupabaseConfig.isEnabled) {
     return gas;
   }
-
-  final supabasePositions = SupabasePositionsDataSource(Supabase.instance.client);
-  return DualSourceReportRepository(
-    gas: gas,
-    supabasePositions: supabasePositions,
-  );
+  try {
+    final supabasePositions = SupabasePositionsDataSource(Supabase.instance.client);
+    return DualSourceReportRepository(
+      gas: gas,
+      supabasePositions: supabasePositions,
+    );
+  } catch (_) {
+    return gas;
+  }
 });
 
 /// Предоставляет данные инициализации (права доступа и список позиций).

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/report_providers.dart';
 import '../../domain/models/user_model.dart';
 import 'economy_screen.dart';
+import 'test_report_screen.dart';
 
 class AdminScreen extends ConsumerWidget {
   const AdminScreen({super.key});
@@ -21,6 +22,14 @@ class AdminScreen extends ConsumerWidget {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const EconomyScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.bug_report_outlined),
+            tooltip: 'Тестовый отчет',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TestReportScreen()),
             ),
           ),
           IconButton(

@@ -8,10 +8,14 @@ import 'src/application/providers/theme_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (SupabaseConfig.isEnabled) {
-    await Supabase.initialize(
-      url: SupabaseConfig.url,
-      anonKey: SupabaseConfig.anonKey,
-    );
+    try {
+      await Supabase.initialize(
+        url: SupabaseConfig.url,
+        anonKey: SupabaseConfig.anonKey,
+      );
+    } catch (_) {
+      // Продолжаем без Supabase — всё пойдёт через GAS
+    }
   }
   runApp(const ProviderScope(child: MyApp()));
 }

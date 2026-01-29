@@ -94,6 +94,22 @@ class DualSourceReportRepository implements ReportRepository {
       _gas.addUser(adminId: adminId, user: user);
 
   @override
-  Future<List<ContractorEconomy>> getEconomyData(String adminId) =>
-      _gas.getEconomyData(adminId);
+  Future<List<ContractorEconomy>> getEconomyData(String adminId) async {
+    // ... существующий код ...
+    return _gas.getEconomyData(adminId);
+  }
+
+  @override
+  Future<void> sendTestReport({
+    required String content,
+    required String userId,
+  }) async {
+    if (_supabasePositions == null) {
+      throw Exception('Supabase не настроен. Запусти с параметрами --dart-define');
+    }
+    await Supabase.instance.client.from('test_reports').insert({
+      'content': content,
+      'author_id': userId,
+    });
+  }
 }

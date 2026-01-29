@@ -54,4 +54,10 @@ abstract class ReportRepository {
 
   /// АДМИН: Получает данные для раздела экономики.
   Future<List<ContractorEconomy>> getEconomyData(String adminId);
+
+  /// ТЕСТ: Отправляет тестовый отчет напрямую в Supabase.
+  Future<void> sendTestReport({
+    required String content,
+    required String userId,
+  });
 }

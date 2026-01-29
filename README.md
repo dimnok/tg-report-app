@@ -15,11 +15,10 @@ flutter run -d chrome
 ```bash
 flutter run -d chrome \
   --dart-define=SUPABASE_URL=http://147.45.99.66:8100 \
-  --dart-define=SUPABASE_ANON_KEY=твой_anon_key_из_env
+  --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pbmlhcHAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcwNjQ3NjAwMCwiZXhwIjoyMDIyMDkyMDAwfQ.unique_anon_part_miniapp
 ```
 
-**Где взять `SUPABASE_ANON_KEY`:**  
-Значение переменной `ANON_KEY` из файла `/root/MiniApp/self-hosting/.env` на сервере.
+(ANON_KEY из `/root/MiniApp/self-hosting/.env` на сервере.)
 
 ## Архитектура
 
