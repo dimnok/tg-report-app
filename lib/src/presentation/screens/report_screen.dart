@@ -98,7 +98,25 @@ class _SystemSelection extends ConsumerWidget {
     final report = ref.watch(reportNotifierProvider);
     final dataAsync = ref.watch(initialDataProvider);
 
-    // ... остальное код ...
+    // Подсчет количества выбранных позиций в каждой системе
+    Map<String, int> systemCounts = {};
+    dataAsync.maybeWhen(
+      data: (data) => data.maybeWhen(
+        authorized: (positions, objects, name, role) {
+          for (var system in systems) {
+            int count = 0;
+            for (var pos in positions) {
+              if (pos.system == system && (report[pos.id] ?? 0) > 0) {
+                count++;
+              }
+            }
+            systemCounts[system] = count;
+          }
+        },
+        orElse: () {},
+      ),
+      orElse: () {},
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +126,6 @@ class _SystemSelection extends ConsumerWidget {
           padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
           child: Text(
             'ВЫБЕРИТЕ СИСТЕМУ',
-// ... остальное код ...
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -145,17 +162,17 @@ class _SystemSelection extends ConsumerWidget {
                             color: count > 0
                               ? (isDark ? Colors.white : Colors.black)
                               : Colors.transparent,
-                          width: count > 0 ? 1.5 : 0,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            width: count > 0 ? 1.5 : 0,
                           ),
-                        ],
-                      ),
-                      child: Row(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
                           children: [
                             Icon(
                               Icons.account_tree_rounded,
@@ -352,7 +369,40 @@ class _MainContent extends ConsumerWidget {
 }
 
 class _ErrorView extends ConsumerWidget {
-// ... остальное код ...
+  final Object error;
+  const _ErrorView({required this.error});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Произошла ошибка',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(initialDataProvider),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(200, 45)),
+              child: const Text('ПОВТОРИТЬ'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _GreetingHeader extends StatelessWidget {
