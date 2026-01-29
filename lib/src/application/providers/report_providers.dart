@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/telegram_interop.dart';
+import '../../core/config/supabase_config.dart';
+import '../../data/datasources/supabase_positions_datasource.dart';
 import '../../data/repositories/report_repository_impl.dart';
+import '../../data/repositories/dual_source_report_repository.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/models/position_model.dart';
 import '../../domain/models/initial_data.dart';
@@ -26,10 +30,21 @@ final userIdProvider = Provider<String>((ref) {
 });
 
 /// Предоставляет экземпляр репозитория для работы с отчетами.
+/// При включённом [SupabaseConfig] позиции читаются из Supabase (тест), остальное — из GAS.
 final reportRepositoryProvider = Provider<ReportRepository>((ref) {
   const gasUrl =
       'https://script.google.com/macros/s/AKfycbz5pHFkbHZMKIl7eIoDv1OoMZnzQsbBVWRQerG6lrUy3-Go0WnDa2NkjKIqVnbTvzM9/exec';
-  return ReportRepositoryImpl(client: http.Client(), url: gasUrl);
+  final gas = ReportRepositoryImpl(client: http.Client(), url: gasUrl);
+
+  if (!SupabaseConfig.isEnabled) {
+    return gas;
+  }
+
+  final supabasePositions = SupabasePositionsDataSource(Supabase.instance.client);
+  return DualSourceReportRepository(
+    gas: gas,
+    supabasePositions: supabasePositions,
+  );
 });
 
 /// Предоставляет данные инициализации (права доступа и список позиций).

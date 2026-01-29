@@ -1,16 +1,45 @@
 # tg_mini_app
 
-A new Flutter project.
+Flutter приложение для работы с отчётами через Telegram Mini App.
 
-## Getting Started
+## Быстрый старт
 
-This project is a starting point for a Flutter application.
+### Обычный запуск (только GAS)
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter run -d chrome
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Тестовый запуск с Supabase (позиции из новой БД)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run -d chrome \
+  --dart-define=SUPABASE_URL=http://147.45.99.66:8100 \
+  --dart-define=SUPABASE_ANON_KEY=твой_anon_key_из_env
+```
+
+**Где взять `SUPABASE_ANON_KEY`:**  
+Значение переменной `ANON_KEY` из файла `/root/MiniApp/self-hosting/.env` на сервере.
+
+## Архитектура
+
+Приложение использует **Clean Architecture** с разделением на слои:
+- **Domain** — бизнес-логика и модели
+- **Data** — репозитории и источники данных (GAS, Supabase)
+- **Application** — провайдеры Riverpod
+- **Presentation** — UI экраны и виджеты
+
+## Тестирование новой базы данных
+
+Для безопасного тестирования Supabase без отключения GAS реализована схема **«двойного источника»**:
+- Позиции читаются из Supabase (если доступно), остальное — из GAS
+- При ошибке Supabase автоматически используется GAS
+- Запись данных всегда идёт через GAS (старая база не меняется)
+
+Подробности: [`docs/SERVER_MAP.md`](docs/SERVER_MAP.md#6-тестовое-чтение-позиций-из-supabase-без-отключения-gas)
+
+## Документация
+
+- [`docs/SERVER_MAP.md`](docs/SERVER_MAP.md) — настройка сервера и подключения
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — архитектура приложения
+- [`docs/BUSINESS_LOGIC.md`](docs/BUSINESS_LOGIC.md) — бизнес-логика

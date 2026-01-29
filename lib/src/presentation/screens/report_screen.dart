@@ -152,15 +152,16 @@ class _SystemSelection extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color:
-                              isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                          color: isDark
+                              ? const Color(0xFF1A1A1A)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: count > 0
                                 ? (isDark ? Colors.white : Colors.black)
                                 : (isDark
-                                    ? Colors.grey[800]!
-                                    : Colors.grey[200]!),
+                                      ? Colors.grey[800]!
+                                      : Colors.grey[200]!),
                             width: count > 0 ? 1.5 : 1,
                           ),
                         ),
@@ -202,8 +203,11 @@ class _SystemSelection extends ConsumerWidget {
                                 ),
                               ),
                             const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward_ios_rounded,
-                                size: 14, color: Colors.grey),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
                           ],
                         ),
                       ),
@@ -291,8 +295,11 @@ class _ObjectSelection extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios_rounded,
-                          size: 14, color: Colors.grey),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                     ],
                   ),
                 ),
