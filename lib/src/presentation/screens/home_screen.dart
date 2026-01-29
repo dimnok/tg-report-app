@@ -165,6 +165,7 @@ class _MenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? const Color(0xFF121212) : const Color(0xFFF0F0F0);
 
     return InkWell(
       onTap: onPressed,
@@ -172,16 +173,16 @@ class _MenuButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFFF0F0F0),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.1),
+              color: isDark ? Colors.black : Colors.black.withValues(alpha: 0.1),
               blurRadius: 15,
               offset: const Offset(8, 8),
             ),
             BoxShadow(
-              color: isDark ? Colors.grey[900]!.withValues(alpha: 0.3) : Colors.white,
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
               blurRadius: 15,
               offset: const Offset(-8, -8),
             ),
@@ -235,6 +236,7 @@ class _GreetingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? const Color(0xFF121212) : const Color(0xFFF0F0F0);
     
     final initials = userName.split(' ')
         .where((e) => e.isNotEmpty)
@@ -247,16 +249,16 @@ class _GreetingCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.1),
+            color: isDark ? Colors.black : Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(10, 10),
           ),
           BoxShadow(
-            color: isDark ? Colors.grey[900]!.withValues(alpha: 0.3) : Colors.white,
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
             blurRadius: 20,
             offset: const Offset(-10, -10),
           ),
