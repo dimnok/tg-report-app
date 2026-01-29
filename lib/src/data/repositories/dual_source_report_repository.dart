@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/models/initial_data.dart';
 import '../../domain/models/position_model.dart';
 import '../../domain/models/production_item.dart';
