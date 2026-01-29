@@ -48,13 +48,11 @@ class MyApp extends ConsumerWidget {
           onSurface: Colors.black,
           outline: Colors.grey[300],
         ),
-        scaffoldBackgroundColor: const Color(0xFFF0F2F5),
+        scaffoldBackgroundColor: const Color(0xFFE0EED0), // Мягкий зеленоватый фон для неоморфизма
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent, // Прозрачный AppBar для чистоты стиля
           foregroundColor: Colors.black,
           elevation: 0,
-          scrolledUnderElevation: 2,
-          surfaceTintColor: Colors.white,
           centerTitle: true,
           titleTextStyle: TextStyle(
             color: Colors.black,
