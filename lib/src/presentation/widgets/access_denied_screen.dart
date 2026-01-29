@@ -31,43 +31,56 @@ class AccessDeniedScreen extends StatelessWidget {
               color: isDark ? Colors.white : Colors.black,
             ),
             const SizedBox(height: 32),
-            Column(
-              children: [
-                Text(
-                  'ДОБРЫЙ ДЕНЬ,',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[500],
-                    letterSpacing: 1.2,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  userName.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'ДОСТУП ОГРАНИЧЕН',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Ваш аккаунт не активирован. Обратитесь к администратору для получения доступа.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, height: 1.5),
+              child: Column(
+                children: [
+                  Text(
+                    'Добрый день,',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Divider(height: 32),
+                  const Text(
+                    'ДОСТУП ОГРАНИЧЕН',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Ваш аккаунт не активирован. Обратитесь к администратору для получения доступа.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, height: 1.4, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
             Container(

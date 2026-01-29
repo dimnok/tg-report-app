@@ -411,40 +411,67 @@ class _GreetingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'ДОБРЫЙ ДЕНЬ,',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[500],
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Получаем инициалы (например, "Дмитрий Т" -> "ДТ")
+    final initials = userName.split(' ')
+        .where((e) => e.isNotEmpty)
+        .take(2)
+        .map((e) => e[0])
+        .join()
+        .toUpperCase();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          const SizedBox(height: 4),
-          Text(
-            userName.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: isDark ? Colors.white : Colors.black,
+            child: Text(
+              initials,
+              style: TextStyle(
+                color: isDark ? Colors.black : Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Добрый день,',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
