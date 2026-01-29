@@ -172,18 +172,16 @@ class _MenuButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFFE0EED0), // Цвет совпадает с фоном
+          color: const Color(0xFFF0F0F0),
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
-            // Темная тень (снизу-справа)
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.2),
+              color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.1),
               blurRadius: 15,
               offset: const Offset(8, 8),
             ),
-            // Светлая тень (сверху-слева)
             BoxShadow(
-              color: isDark ? Colors.grey[800]!.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.grey[900]!.withValues(alpha: 0.3) : Colors.white,
               blurRadius: 15,
               offset: const Offset(-8, -8),
             ),
@@ -196,14 +194,14 @@ class _MenuButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isPrimary 
                   ? Colors.black.withValues(alpha: 0.05) 
-                  : Colors.white.withValues(alpha: 0.2),
+                  : Colors.white.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 24,
                 color: isPrimary
-                    ? (isDark ? Colors.blue[200] : Colors.green[800])
+                    ? (isDark ? Colors.blue[200] : Colors.black)
                     : (isDark ? Colors.white : Colors.black87),
               ),
             ),
@@ -214,7 +212,7 @@ class _MenuButton extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.5,
-                color: isDark ? Colors.white : Colors.black87,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
             const Spacer(),
@@ -249,16 +247,16 @@ class _GreetingCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0EED0),
+        color: const Color(0xFFF0F0F0),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
+            color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(10, 10),
           ),
           BoxShadow(
-            color: isDark ? Colors.grey[800]!.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.8),
+            color: isDark ? Colors.grey[900]!.withValues(alpha: 0.3) : Colors.white,
             blurRadius: 20,
             offset: const Offset(-10, -10),
           ),

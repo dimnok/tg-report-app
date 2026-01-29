@@ -48,9 +48,9 @@ class MyApp extends ConsumerWidget {
           onSurface: Colors.black,
           outline: Colors.grey[300],
         ),
-        scaffoldBackgroundColor: const Color(0xFFE0EED0), // Мягкий зеленоватый фон для неоморфизма
+        scaffoldBackgroundColor: const Color(0xFFF0F0F0), // Светло-серый фон для ЧБ неоморфизма
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent, // Прозрачный AppBar для чистоты стиля
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.black,
           elevation: 0,
           centerTitle: true,
