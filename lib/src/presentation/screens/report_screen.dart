@@ -65,10 +65,10 @@ class ReportScreen extends ConsumerWidget {
         data: (data) => data.when(
           authorized: (positions, objects, userName, role) {
             if (selectedObject == null) {
-              return _ObjectSelection(objects: objects);
+              return _ObjectSelection(objects: objects, userName: userName);
             }
             if (selectedSystem == null) {
-              return const _SystemSelection();
+              return _SystemSelection(userName: userName);
             }
             return const _MainContent();
           },
@@ -88,7 +88,8 @@ class ReportScreen extends ConsumerWidget {
 }
 
 class _SystemSelection extends ConsumerWidget {
-  const _SystemSelection();
+  final String userName;
+  const _SystemSelection({required this.userName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -97,33 +98,17 @@ class _SystemSelection extends ConsumerWidget {
     final report = ref.watch(reportNotifierProvider);
     final dataAsync = ref.watch(initialDataProvider);
 
-    // Подсчет количества выбранных позиций в каждой системе
-    Map<String, int> systemCounts = {};
-    dataAsync.maybeWhen(
-      data: (data) => data.maybeWhen(
-        authorized: (positions, objects, name, role) {
-          for (var system in systems) {
-            int count = 0;
-            for (var pos in positions) {
-              if (pos.system == system && (report[pos.id] ?? 0) > 0) {
-                count++;
-              }
-            }
-            systemCounts[system] = count;
-          }
-        },
-        orElse: () {},
-      ),
-      orElse: () {},
-    );
+    // ... остальное код ...
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _GreetingHeader(userName: userName),
         const Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+          padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
           child: Text(
             'ВЫБЕРИТЕ СИСТЕМУ',
+// ... остальное код ...
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -243,7 +228,8 @@ class _SystemSelection extends ConsumerWidget {
 
 class _ObjectSelection extends ConsumerWidget {
   final List<WorkObject> objects;
-  const _ObjectSelection({required this.objects});
+  final String userName;
+  const _ObjectSelection({required this.objects, required this.userName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -252,8 +238,9 @@ class _ObjectSelection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _GreetingHeader(userName: userName),
         const Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+          padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
           child: Text(
             'ВЫБЕРИТЕ ОБЪЕКТ',
             style: TextStyle(
@@ -365,37 +352,52 @@ class _MainContent extends ConsumerWidget {
 }
 
 class _ErrorView extends ConsumerWidget {
-  final Object error;
-  const _ErrorView({required this.error});
+// ... остальное код ...
+}
+
+class _GreetingHeader extends StatelessWidget {
+  final String userName;
+  const _GreetingHeader({required this.userName});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'Произошла ошибка',
-              style: TextStyle(fontWeight: FontWeight.bold),
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'ДОБРЫЙ ДЕНЬ,',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[500],
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 4,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            userName.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
             ),
-            const SizedBox(height: 8),
-            Text(
-              error.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => ref.invalidate(initialDataProvider),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(200, 45)),
-              child: const Text('ПОВТОРИТЬ'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

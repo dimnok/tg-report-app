@@ -31,17 +31,29 @@ class AccessDeniedScreen extends StatelessWidget {
               color: isDark ? Colors.white : Colors.black,
             ),
             const SizedBox(height: 32),
-            Text(
-              'ДОБРЫЙ ДЕНЬ, ${userName.toUpperCase()}!',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 1,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
+            Column(
+              children: [
+                Text(
+                  'ДОБРЫЙ ДЕНЬ,',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[500],
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  userName.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
             const Text(
               'ДОСТУП ОГРАНИЧЕН',
               style: TextStyle(
