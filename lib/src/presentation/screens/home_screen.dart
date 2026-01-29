@@ -80,25 +80,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       authorized: (positions, objects, name, role) => name,
                       unauthorized: (_, name) => name,
                     );
-                    return Text(
-                      'ДОБРЫЙ ДЕНЬ,\n${name.toUpperCase()}!',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        height: 1.1,
-                      ),
-                    );
+                    return _GreetingCard(userName: name);
                   },
-                  loading: () => const Text(
-                    'ЗАГРУЗКА...',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-                  ),
-                  error: (_, _) => const Text(
-                    'ДОБРЫЙ ДЕНЬ!',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-                  ),
+                  loading: () => const _GreetingLoading(),
+                  error: (_, _) => const _GreetingCard(userName: 'Гость'),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 24),
                 _MenuButton(
                   title: 'ОТЧЁТ',
                   icon: Icons.assignment_rounded,
@@ -235,6 +222,97 @@ class _MenuButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GreetingCard extends StatelessWidget {
+  final String userName;
+  const _GreetingCard({required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final initials = userName.split(' ')
+        .where((e) => e.isNotEmpty)
+        .take(2)
+        .map((e) => e[0])
+        .join()
+        .toUpperCase();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: isDark ? Colors.white : Colors.black,
+            child: Text(
+              initials,
+              style: TextStyle(
+                color: isDark ? Colors.black : Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Добрый день,',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GreetingLoading extends StatelessWidget {
+  const _GreetingLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 108,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 }

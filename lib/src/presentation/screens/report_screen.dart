@@ -65,10 +65,10 @@ class ReportScreen extends ConsumerWidget {
         data: (data) => data.when(
           authorized: (positions, objects, userName, role) {
             if (selectedObject == null) {
-              return _ObjectSelection(objects: objects, userName: userName);
+              return _ObjectSelection(objects: objects);
             }
             if (selectedSystem == null) {
-              return _SystemSelection(userName: userName);
+              return const _SystemSelection();
             }
             return const _MainContent();
           },
@@ -88,8 +88,7 @@ class ReportScreen extends ConsumerWidget {
 }
 
 class _SystemSelection extends ConsumerWidget {
-  final String userName;
-  const _SystemSelection({required this.userName});
+  const _SystemSelection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -121,9 +120,8 @@ class _SystemSelection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _GreetingHeader(userName: userName),
         const Padding(
-          padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Text(
             'ВЫБЕРИТЕ СИСТЕМУ',
             style: TextStyle(
@@ -245,8 +243,7 @@ class _SystemSelection extends ConsumerWidget {
 
 class _ObjectSelection extends ConsumerWidget {
   final List<WorkObject> objects;
-  final String userName;
-  const _ObjectSelection({required this.objects, required this.userName});
+  const _ObjectSelection({required this.objects});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -255,9 +252,8 @@ class _ObjectSelection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _GreetingHeader(userName: userName),
         const Padding(
-          padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Text(
             'ВЫБЕРИТЕ ОБЪЕКТ',
             style: TextStyle(
@@ -405,77 +401,3 @@ class _ErrorView extends ConsumerWidget {
   }
 }
 
-class _GreetingHeader extends StatelessWidget {
-  final String userName;
-  const _GreetingHeader({required this.userName});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Получаем инициалы (например, "Дмитрий Т" -> "ДТ")
-    final initials = userName.split(' ')
-        .where((e) => e.isNotEmpty)
-        .take(2)
-        .map((e) => e[0])
-        .join()
-        .toUpperCase();
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: isDark ? Colors.white : Colors.black,
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: isDark ? Colors.black : Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Добрый день,',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[500],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  userName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
