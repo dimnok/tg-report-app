@@ -30,12 +30,19 @@ class PositionsList extends ConsumerWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
             border: Border.all(
               color: quantity > 0
                   ? (isDark ? Colors.white : Colors.black)
-                  : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
-              width: quantity > 0 ? 1.5 : 1,
+                  : Colors.transparent,
+              width: quantity > 0 ? 1.5 : 0,
             ),
           ),
           child: Padding(
@@ -134,8 +141,12 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          width: 0.5,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

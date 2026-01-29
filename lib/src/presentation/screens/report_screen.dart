@@ -158,14 +158,19 @@ class _SystemSelection extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: count > 0
-                                ? (isDark ? Colors.white : Colors.black)
-                                : (isDark
-                                      ? Colors.grey[800]!
-                                      : Colors.grey[200]!),
-                            width: count > 0 ? 1.5 : 1,
-                          ),
+                              ? (isDark ? Colors.white : Colors.black)
+                              : Colors.transparent,
+                          width: count > 0 ? 1.5 : 0,
                         ),
-                        child: Row(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
                           children: [
                             Icon(
                               Icons.account_tree_rounded,
@@ -273,11 +278,15 @@ class _ObjectSelection extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                    ),
+                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [

@@ -48,17 +48,19 @@ class MyApp extends ConsumerWidget {
           onSurface: Colors.black,
           outline: Colors.grey[300],
         ),
-        scaffoldBackgroundColor: const Color(0xFFFBFBFB),
+        scaffoldBackgroundColor: const Color(0xFFF0F2F5),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
+          scrolledUnderElevation: 2,
+          surfaceTintColor: Colors.white,
           centerTitle: true,
           titleTextStyle: TextStyle(
             color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -67,9 +69,10 @@ class MyApp extends ConsumerWidget {
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(56),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
             ),
-            elevation: 0,
+            elevation: 8,
+            shadowColor: Colors.black.withValues(alpha: 0.3),
           ),
         ),
         cardTheme: CardThemeData(
