@@ -173,13 +173,13 @@ class _MenuButton extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: isPrimary
-              ? (isDark ? Colors.blueGrey[800] : Colors.blueGrey[50])
-              : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
+              ? (isDark ? Colors.blueGrey[800] : const Color(0xFFE8F5E9))
+              : (isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF1F8E9)),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isPrimary
-                ? (isDark ? Colors.blueGrey[600]! : Colors.blueGrey[200]!)
-                : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
+                ? (isDark ? Colors.blueGrey[600]! : const Color(0xFFC8E6C9))
+                : (isDark ? Colors.grey[800]! : const Color(0xFFDCEDC8)),
           ),
           boxShadow: [
             if (!isDark)
