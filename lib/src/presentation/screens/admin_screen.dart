@@ -63,6 +63,7 @@ class AdminScreen extends ConsumerWidget {
     final idController = TextEditingController();
     final nameController = TextEditingController();
     final contractorController = TextEditingController();
+    final groupChatIdController = TextEditingController();
     String selectedStatus = 'authorized';
     String selectedRole = 'user';
 
@@ -87,6 +88,14 @@ class AdminScreen extends ConsumerWidget {
                 TextField(
                   controller: contractorController,
                   decoration: const InputDecoration(labelText: 'Подрядчик'),
+                ),
+                TextField(
+                  controller: groupChatIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'ID группы для отчётов',
+                    hintText: '-1001234567890 (пусто = группа по умолчанию)',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(signed: true),
                 ),
                 DropdownButtonFormField<String>(
                   initialValue: selectedStatus,
@@ -136,6 +145,7 @@ class AdminScreen extends ConsumerWidget {
                         contractor: contractorController.text,
                         status: selectedStatus,
                         role: selectedRole,
+                        groupChatId: groupChatIdController.text.trim(),
                       ),
                     );
                 ref.invalidate(allUsersProvider);
@@ -208,6 +218,14 @@ class _UserCard extends ConsumerWidget {
             ],
           ),
           const Divider(height: 24),
+          if (user.groupChatId.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _InfoChip(
+                label: 'Группа для отчётов',
+                value: user.groupChatId,
+              ),
+            ),
           Row(
             children: [
               _InfoChip(label: 'Подрядчик', value: user.contractor),
@@ -234,6 +252,7 @@ class _UserCard extends ConsumerWidget {
   void _showEditDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController(text: user.name);
     final contractorController = TextEditingController(text: user.contractor);
+    final groupChatIdController = TextEditingController(text: user.groupChatId);
     String selectedStatus = user.status;
     String selectedRole = user.role;
 
@@ -253,6 +272,14 @@ class _UserCard extends ConsumerWidget {
                 TextField(
                   controller: contractorController,
                   decoration: const InputDecoration(labelText: 'Подрядчик'),
+                ),
+                TextField(
+                  controller: groupChatIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'ID группы для отчётов',
+                    hintText: '-1001234567890 (пусто = группа по умолчанию)',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(signed: true),
                 ),
                 DropdownButtonFormField<String>(
                   initialValue: selectedStatus,
@@ -302,6 +329,7 @@ class _UserCard extends ConsumerWidget {
                         'contractor': contractorController.text,
                         'status': selectedStatus,
                         'role': selectedRole,
+                        'group_chat_id': groupChatIdController.text.trim(),
                       },
                     );
                 ref.invalidate(allUsersProvider);

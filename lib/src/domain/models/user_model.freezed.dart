@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get id; String get name; String get status; String get contractor; String get role;
+ String get id; String get name; String get status; String get contractor; String get role;/// ID Telegram-группы для отчётов пользователя (например -1001234567890).
+/// Если пусто — используется группа по умолчанию (fallback).
+@JsonKey(name: 'group_chat_id') String get groupChatId;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.status, status) || other.status == status)&&(identical(other.contractor, contractor) || other.contractor == contractor)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.status, status) || other.status == status)&&(identical(other.contractor, contractor) || other.contractor == contractor)&&(identical(other.role, role) || other.role == role)&&(identical(other.groupChatId, groupChatId) || other.groupChatId == groupChatId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,status,contractor,role);
+int get hashCode => Object.hash(runtimeType,id,name,status,contractor,role,groupChatId);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, name: $name, status: $status, contractor: $contractor, role: $role)';
+  return 'UserModel(id: $id, name: $name, status: $status, contractor: $contractor, role: $role, groupChatId: $groupChatId)';
 }
 
 
@@ -48,7 +50,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String status, String contractor, String role
+ String id, String name, String status, String contractor, String role,@JsonKey(name: 'group_chat_id') String groupChatId
 });
 
 
@@ -65,13 +67,14 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? status = null,Object? contractor = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? status = null,Object? contractor = null,Object? role = null,Object? groupChatId = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,contractor: null == contractor ? _self.contractor : contractor // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,groupChatId: null == groupChatId ? _self.groupChatId : groupChatId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -157,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String status,  String contractor,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String status,  String contractor,  String role, @JsonKey(name: 'group_chat_id')  String groupChatId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);case _:
+return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role,_that.groupChatId);case _:
   return orElse();
 
 }
@@ -178,10 +181,10 @@ return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String status,  String contractor,  String role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String status,  String contractor,  String role, @JsonKey(name: 'group_chat_id')  String groupChatId)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
-return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);case _:
+return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role,_that.groupChatId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +201,10 @@ return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String status,  String contractor,  String role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String status,  String contractor,  String role, @JsonKey(name: 'group_chat_id')  String groupChatId)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);case _:
+return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role,_that.groupChatId);case _:
   return null;
 
 }
@@ -213,7 +216,7 @@ return $default(_that.id,_that.name,_that.status,_that.contractor,_that.role);ca
 @JsonSerializable()
 
 class _UserModel implements UserModel {
-  const _UserModel({this.id = '', this.name = 'Без имени', this.status = 'blocked', this.contractor = 'Без подрядчика', this.role = 'user'});
+  const _UserModel({this.id = '', this.name = 'Без имени', this.status = 'blocked', this.contractor = 'Без подрядчика', this.role = 'user', @JsonKey(name: 'group_chat_id') this.groupChatId = ''});
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override@JsonKey() final  String id;
@@ -221,6 +224,9 @@ class _UserModel implements UserModel {
 @override@JsonKey() final  String status;
 @override@JsonKey() final  String contractor;
 @override@JsonKey() final  String role;
+/// ID Telegram-группы для отчётов пользователя (например -1001234567890).
+/// Если пусто — используется группа по умолчанию (fallback).
+@override@JsonKey(name: 'group_chat_id') final  String groupChatId;
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.status, status) || other.status == status)&&(identical(other.contractor, contractor) || other.contractor == contractor)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.status, status) || other.status == status)&&(identical(other.contractor, contractor) || other.contractor == contractor)&&(identical(other.role, role) || other.role == role)&&(identical(other.groupChatId, groupChatId) || other.groupChatId == groupChatId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,status,contractor,role);
+int get hashCode => Object.hash(runtimeType,id,name,status,contractor,role,groupChatId);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, name: $name, status: $status, contractor: $contractor, role: $role)';
+  return 'UserModel(id: $id, name: $name, status: $status, contractor: $contractor, role: $role, groupChatId: $groupChatId)';
 }
 
 
@@ -255,7 +261,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String status, String contractor, String role
+ String id, String name, String status, String contractor, String role,@JsonKey(name: 'group_chat_id') String groupChatId
 });
 
 
@@ -272,13 +278,14 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? status = null,Object? contractor = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? status = null,Object? contractor = null,Object? role = null,Object? groupChatId = null,}) {
   return _then(_UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,contractor: null == contractor ? _self.contractor : contractor // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,groupChatId: null == groupChatId ? _self.groupChatId : groupChatId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

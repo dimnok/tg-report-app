@@ -12,6 +12,7 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   status: json['status'] as String? ?? 'blocked',
   contractor: json['contractor'] as String? ?? 'Без подрядчика',
   role: json['role'] as String? ?? 'user',
+  groupChatId: json['group_chat_id'] as String? ?? '',
 );
 
 Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
@@ -21,4 +22,5 @@ Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
       'status': instance.status,
       'contractor': instance.contractor,
       'role': instance.role,
+      'group_chat_id': instance.groupChatId,
     };
