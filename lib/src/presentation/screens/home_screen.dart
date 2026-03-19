@@ -10,9 +10,35 @@ import 'production_screen.dart';
 import 'placeholder_screen.dart';
 import 'admin_screen.dart';
 
-/// Главный стартовый экран приложения.
+/// Цвета акцента в стиле WhatsApp.
+const Color _whatsappTeal = Color(0xFF075E54);
+const Color _whatsappGreen = Color(0xFF00A884);
+
+/// Цвета карточек по разделам.
+List<Color> _cardGradient(String id, bool isDark) {
+  return switch (id) {
+    'report' => isDark
+        ? [const Color(0xFF00897B), const Color(0xFF00695C)]
+        : [const Color(0xFF075E54), const Color(0xFF004D40)],
+    'production' => isDark
+        ? [const Color(0xFF1976D2), const Color(0xFF0D47A1)]
+        : [const Color(0xFF1565C0), const Color(0xFF0D47A1)],
+    'timesheet' => isDark
+        ? [const Color(0xFFFB8C00), const Color(0xFFE65100)]
+        : [const Color(0xFFFF9800), const Color(0xFFE65100)],
+    'admin' => isDark
+        ? [const Color(0xFF7B1FA2), const Color(0xFF4A148C)]
+        : [const Color(0xFF6A1B9A), const Color(0xFF4A148C)],
+    _ => isDark
+        ? [_whatsappGreen, const Color(0xFF00897B)]
+        : [_whatsappTeal, const Color(0xFF004D40)],
+  };
+}
+
+/// Главный экран в стиле дашборда.
 ///
-/// Отображает текущую дату, приветствие и кнопки навигации по разделам.
+/// Отображает приветствие, горизонтальные табы, featured-карточку
+/// и список разделов. Вся логика навигации сохраняется.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,307 +47,431 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedTabIndex = 0;
+  late PageController _pageController;
+
   @override
   void initState() {
     super.initState();
-    // Инициализация локализации для корректного отображения даты на русском
     initializeDateFormatting('ru_RU', null);
+    _pageController = PageController(viewportFraction: 0.92);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(initialDataProvider);
     final themeMode = ref.watch(themeProvider);
-
-    // Форматирование текущей даты
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final formattedDate = DateFormat('EEEE, d MMMM', 'ru_RU').format(now);
+    final userName = dataAsync.when(
+      data: (data) => data.when(
+        authorized: (_, __, name, ___) => name,
+        unauthorized: (_, name) => name,
+      ),
+      loading: () => '...',
+      error: (_, __) => 'Гость',
+    );
+    final isAdmin = dataAsync.maybeWhen(
+      data: (data) => data.maybeWhen(
+        authorized: (_, __, ___, role) => role == 'admin',
+        orElse: () => false,
+      ),
+      orElse: () => false,
+    );
+
+    final tabs = [
+      _HomeTab(id: 'report', label: 'Отчёт', icon: Icons.assignment_rounded),
+      _HomeTab(id: 'production', label: 'Выработка', icon: Icons.trending_up_rounded),
+      _HomeTab(id: 'timesheet', label: 'Табель', icon: Icons.calendar_today_rounded),
+      if (isAdmin) _HomeTab(id: 'admin', label: 'Управление', icon: Icons.admin_panel_settings_rounded),
+    ];
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: Icon(
             themeMode == ThemeMode.dark
                 ? Icons.light_mode_rounded
                 : Icons.dark_mode_rounded,
-            size: 20,
+            size: 22,
+            color: isDark ? Colors.white : Colors.black,
           ),
           onPressed: () => ref.read(themeProvider.notifier).toggle(),
         ),
-        title: const Text('ГЛАВНАЯ'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 22),
+            icon: Icon(
+              Icons.refresh_rounded,
+              size: 22,
+              color: isDark ? Colors.white : Colors.black,
+            ),
             onPressed: () => ref.invalidate(initialDataProvider),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  formattedDate.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (dataAsync.isLoading || dataAsync.isReloading)
+              LinearProgressIndicator(
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDark ? _whatsappGreen : _whatsappTeal,
+                ),
+              ),
+            // Приветствие
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Привет, $userName',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                      letterSpacing: -0.5,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                dataAsync.when(
-                  data: (data) {
-                    final name = data.when(
-                      authorized: (positions, objects, name, role) => name,
-                      unauthorized: (_, name) => name,
-                    );
-                    return _GreetingCard(userName: name);
-                  },
-                  loading: () => const _GreetingLoading(),
-                  error: (_, _) => const _GreetingCard(userName: 'Гость'),
-                ),
-                const SizedBox(height: 24),
-                _MenuButton(
-                  title: 'ОТЧЁТ',
-                  icon: Icons.assignment_rounded,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ReportScreen()),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (isDark ? _whatsappGreen : _whatsappTeal).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: (isDark ? _whatsappGreen : _whatsappTeal).withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          size: 14,
+                          color: isDark ? _whatsappGreen : _whatsappTeal,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _MenuButton(
-                  title: 'ВЫРАБОТКА',
-                  icon: Icons.trending_up_rounded,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProductionScreen()),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _MenuButton(
-                  title: 'ТАБЕЛЬ',
-                  icon: Icons.calendar_today_rounded,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PlaceholderScreen(title: 'Табель'),
+                ],
+              ),
+            ),
+            // Горизонтальные табы
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 0, 16),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(
+                    tabs.length,
+                    (index) => _TabChip(
+                      label: tabs[index].label,
+                      isSelected: _selectedTabIndex == index,
+                      onTap: () {
+                        setState(() => _selectedTabIndex = index);
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      isDark: isDark,
                     ),
                   ),
                 ),
-                // Админ-панель
-                dataAsync.maybeWhen(
-                  data: (data) => data.maybeWhen(
-                    authorized: (positions, objects, name, role) {
-                      if (role == 'admin') {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: _MenuButton(
-                            title: 'АДМИН-ПАНЕЛЬ',
-                            icon: Icons.admin_panel_settings_rounded,
-                            isPrimary: true,
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AdminScreen(),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                    orElse: () => const SizedBox.shrink(),
-                  ),
-                  orElse: () => const SizedBox.shrink(),
-                ),
-              ],
+              ),
             ),
-          ),
+            // Карточки со свайпом
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) =>
+                    setState(() => _selectedTabIndex = index),
+                itemCount: tabs.length,
+                itemBuilder: (context, index) {
+                  final tab = tabs[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, child) {
+                        final page = _pageController.page ?? index.toDouble();
+                        final diff = (page - index).abs();
+                        final scale = (1.0 - diff * 0.12).clamp(0.88, 1.0);
+                        return Transform.scale(
+                          scale: scale,
+                          alignment: Alignment.center,
+                          child: child,
+                        );
+                      },
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => _FeaturedCard(
+                          tab: tab,
+                          isDark: isDark,
+                          minHeight: constraints.maxHeight,
+                          onTap: () => _navigateTo(context, tab.id),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  void _navigateTo(BuildContext context, String tabId) {
+    switch (tabId) {
+      case 'report':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportScreen()));
+        break;
+      case 'production':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductionScreen()));
+        break;
+      case 'timesheet':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PlaceholderScreen(title: 'Табель')),
+        );
+        break;
+      case 'admin':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()));
+        break;
+    }
+  }
 }
 
-class _MenuButton extends StatelessWidget {
-  final String title;
+class _HomeTab {
+  final String id;
+  final String label;
   final IconData icon;
-  final VoidCallback onPressed;
-  final bool isPrimary;
+  const _HomeTab({required this.id, required this.label, required this.icon});
+}
 
-  const _MenuButton({
-    required this.title,
-    required this.icon,
-    required this.onPressed,
-    this.isPrimary = false,
+class _TabChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool isDark;
+
+  const _TabChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF121212) : const Color(0xFFF0F0F0);
-
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(28),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: isDark ? Colors.black : Colors.black.withValues(alpha: 0.1),
-              blurRadius: 15,
-              offset: const Offset(8, 8),
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark ? _whatsappGreen : _whatsappTeal)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? _whatsappGreen : _whatsappTeal)
+                  : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+              width: 1.5,
             ),
-            BoxShadow(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-              blurRadius: 15,
-              offset: const Offset(-8, -8),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isPrimary 
-                  ? Colors.black.withValues(alpha: 0.05) 
-                  : Colors.white.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isPrimary
-                    ? (isDark ? Colors.blue[200] : Colors.black)
-                    : (isDark ? Colors.white : Colors.black87),
-              ),
-            ),
-            const SizedBox(width: 20),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-            ),
-            const Spacer(),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: isDark ? Colors.grey[600] : Colors.black26,
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _GreetingCard extends StatelessWidget {
-  final String userName;
-  const _GreetingCard({required this.userName});
+class _FeaturedCard extends StatelessWidget {
+  final _HomeTab tab;
+  final bool isDark;
+  final double? minHeight;
+  final VoidCallback onTap;
+
+  const _FeaturedCard({
+    required this.tab,
+    required this.isDark,
+    this.minHeight,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF121212) : const Color(0xFFF0F0F0);
-    
-    final initials = userName.split(' ')
-        .where((e) => e.isNotEmpty)
-        .take(2)
-        .map((e) => e[0])
-        .join()
-        .toUpperCase();
+    final (String title, String subtitle, List<String> bullets) = switch (tab.id) {
+      'report' => (
+          'Сформировать отчёт',
+          'Выберите объект и заполните позиции',
+          ['Выбор объекта и системы', 'Заполнение позиций', 'Отправка отчёта'],
+        ),
+      'production' => (
+          'Просмотреть выработку',
+          'Итоги по всем объектам',
+          ['Статистика по объектам', 'Динамика выработки', 'Сравнение периодов'],
+        ),
+      'timesheet' => (
+          'Табель',
+          'Учёт рабочего времени',
+          ['Учёт часов и смен', 'Выходные и праздники', 'Архив табелей'],
+        ),
+      'admin' => (
+          'Управление',
+          'Пользователи и настройки',
+          ['Управление пользователями', 'Роли и доступы', 'Настройки приложения'],
+        ),
+      _ => (tab.label, '', <String>[]),
+    };
+    final gradientColors = _cardGradient(tab.id, isDark);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black : Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(10, 10),
-          ),
-          BoxShadow(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-            blurRadius: 20,
-            offset: const Offset(-10, -10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: isDark ? Colors.white : Colors.black,
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: isDark ? Colors.black : Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        splashColor: Colors.white.withValues(alpha: 0.2),
+        highlightColor: Colors.white.withValues(alpha: 0.1),
+        child: Container(
+          width: double.infinity,
+          constraints: minHeight != null ? BoxConstraints(minHeight: minHeight!) : null,
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors,
             ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors.first.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Добрый день,',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                child: Icon(tab.icon, size: 32, color: Colors.white),
+              ),
+              if (minHeight != null) const Spacer(),
+              const SizedBox(height: 24),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              if (subtitle.isNotEmpty) ...[
+                const SizedBox(height: 8),
                 Text(
-                  userName,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    height: 1.4,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-            ),
+              if (bullets.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                ...bullets.map(
+                  (b) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            b,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.85),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _GreetingLoading extends StatelessWidget {
-  const _GreetingLoading();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 108,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-    );
-  }
-}

@@ -96,7 +96,7 @@ class _SubmitButtonState extends ConsumerState<SubmitButton> {
             Icon(
               Icons.check_circle_outline,
               size: 64,
-              color: isDark ? Colors.white : Colors.black,
+              color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 24),
             Text(

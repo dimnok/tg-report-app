@@ -9,6 +9,9 @@ import '../../domain/models/user_model.dart';
 import '../../domain/models/economy_model.dart';
 import '../../domain/repositories/report_repository.dart';
 
+/// Таймаут HTTP-запросов (GAS холодный старт может занимать 15–30 сек).
+const Duration _requestTimeout = Duration(seconds: 30);
+
 /// Реализация [ReportRepository] для работы с Google Apps Script (GAS) через HTTP.
 class ReportRepositoryImpl implements ReportRepository {
   /// HTTP-клиент для запросов.
@@ -26,7 +29,13 @@ class ReportRepositoryImpl implements ReportRepository {
       if (objectId != null) {
         query += '&objectId=$objectId';
       }
-      final response = await client.get(Uri.parse(query));
+      final response = await client
+          .get(Uri.parse(query))
+          .timeout(_requestTimeout, onTimeout: () {
+        throw Exception(
+          'Превышено время ожидания. GAS-сервер может быть перегружен.',
+        );
+      });
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
@@ -66,9 +75,11 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<List<ProductionItem>> getProductionData(String userId) async {
     try {
-      final response = await client.get(
-        Uri.parse('$url?userId=$userId&action=getProduction'),
-      );
+      final response = await client
+          .get(Uri.parse('$url?userId=$userId&action=getProduction'))
+          .timeout(_requestTimeout, onTimeout: () {
+        throw Exception('Превышено время ожидания при загрузке выработки.');
+      });
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data['status'] == 'success') {
@@ -156,9 +167,11 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<List<UserModel>> getUsers(String adminId) async {
     try {
-      final response = await client.get(
-        Uri.parse('$url?userId=$adminId&action=getUsers'),
-      );
+      final response = await client
+          .get(Uri.parse('$url?userId=$adminId&action=getUsers'))
+          .timeout(_requestTimeout, onTimeout: () {
+        throw Exception('Превышено время ожидания при загрузке пользователей.');
+      });
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data['status'] == 'success') {
@@ -246,9 +259,11 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<List<ContractorEconomy>> getEconomyData(String adminId) async {
     try {
-      final response = await client.get(
-        Uri.parse('$url?userId=$adminId&action=getEconomy'),
-      );
+      final response = await client
+          .get(Uri.parse('$url?userId=$adminId&action=getEconomy'))
+          .timeout(_requestTimeout, onTimeout: () {
+        throw Exception('Превышено время ожидания при загрузке экономики.');
+      });
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data['status'] == 'success') {
@@ -267,11 +282,4 @@ class ReportRepositoryImpl implements ReportRepository {
     }
   }
 
-  @override
-  Future<void> sendTestReport({
-    required String content,
-    required String userId,
-  }) {
-    throw UnimplementedError('Тестовый отчет работает только через Supabase');
-  }
 }

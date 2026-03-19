@@ -226,13 +226,13 @@ class _GrandTotalPanel extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[800]!
+                : Colors.grey[200]!,
           ),
-        ],
+        ),
       ),
       child: SafeArea(
         top: false,

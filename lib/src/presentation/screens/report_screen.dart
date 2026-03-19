@@ -17,13 +17,22 @@ class ReportScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(initialDataProvider);
     final themeMode = ref.watch(themeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedObject = ref.watch(selectedObjectProvider);
     final selectedSystem = ref.watch(selectedSystemProvider);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
+    return PopScope(
+      canPop: selectedObject == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (selectedSystem != null) {
+          ref.read(selectedSystemProvider.notifier).select(null);
+        } else if (selectedObject != null) {
+          ref.read(selectedObjectProvider.notifier).select(null);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
         title: Text(
           selectedSystem?.toUpperCase() ??
               (selectedObject?.name.toUpperCase() ?? 'ОТЧЕТ'),
@@ -76,12 +85,34 @@ class ReportScreen extends ConsumerWidget {
               AccessDeniedScreen(userId: userId, userName: userName),
         ),
         loading: () => Center(
-          child: CircularProgressIndicator(
-            color: isDark ? Colors.white : Colors.black,
-            strokeWidth: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+                strokeWidth: 2,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Загрузка данных...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Первый запуск может занять до 30 сек.',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ),
         error: (error, stack) => _ErrorView(error: error),
+      ),
       ),
     );
   }
@@ -117,19 +148,33 @@ class _SystemSelection extends ConsumerWidget {
       orElse: () {},
     );
 
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Text(
-            'ВЫБЕРИТЕ СИСТЕМУ',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 1.2,
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'ВЫБЕРИТЕ СИСТЕМУ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -152,23 +197,14 @@ class _SystemSelection extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1A1A1A)
-                              : Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: count > 0
-                              ? (isDark ? Colors.white : Colors.black)
-                              : Colors.transparent,
-                            width: count > 0 ? 1.5 : 0,
+                              ? Theme.of(context).colorScheme.primary
+                              : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
+                            width: count > 0 ? 1.5 : 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: Row(
                           children: [
@@ -252,16 +288,29 @@ class _ObjectSelection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Text(
-            'ВЫБЕРИТЕ ОБЪЕКТ',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 1.2,
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'ВЫБЕРИТЕ ОБЪЕКТ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -278,15 +327,11 @@ class _ObjectSelection extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+                    border: Border.all(
+                      color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                    ),
                   ),
                   child: Row(
                     children: [

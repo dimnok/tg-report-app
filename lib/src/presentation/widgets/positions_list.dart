@@ -26,24 +26,27 @@ class PositionsList extends ConsumerWidget {
         final item = positions[index];
         final quantity = report[item.id] ?? 0;
 
+        final primary = Theme.of(context).colorScheme.primary;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
             border: Border.all(
               color: quantity > 0
-                  ? (isDark ? Colors.white : Colors.black)
-                  : Colors.transparent,
-              width: quantity > 0 ? 1.5 : 0,
+                  ? primary
+                  : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
+              width: quantity > 0 ? 2 : 1,
             ),
+            boxShadow: quantity > 0
+                ? [
+                    BoxShadow(
+                      color: primary.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -138,14 +141,19 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark ? Colors.black : Colors.white,
+        color: widget.quantity > 0
+            ? primary.withValues(alpha: 0.08)
+            : (isDark ? Colors.black : Colors.white),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-          width: 0.5,
+          color: widget.quantity > 0
+              ? primary.withValues(alpha: 0.5)
+              : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
+          width: widget.quantity > 0 ? 1.5 : 0.5,
         ),
       ),
       child: Row(

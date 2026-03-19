@@ -1,6 +1,7 @@
 // --- НАСТРОЙКИ ---
 const BOT_TOKEN = '8207223276:AAEXz-mxonTDWeDWzZbBfCEfxzP8sxVd7X8';
 const CHAT_ID = '-5031509821';
+const CHAT_ID_GROUP2 = '-1003781880260';
 const APP_DIRECT_LINK = 'https://t.me/gteng_bot/Othet';
 // -----------------
 
@@ -407,4 +408,103 @@ function sendDocumentToTelegram(chatId, blob, caption) {
     method: "post",
     payload: { chat_id: chatId, document: blob, caption: caption, parse_mode: "Markdown" }
   });
+}
+
+/**
+ * Отправка в Telegram с проверкой миграции группы в супергруппу.
+ * Возвращает { ok: true } или { ok: false, message: "текст ошибки" }.
+ */
+function sendToTelegramWithMigrateCheck(text, chatId) {
+  const targetChat = chatId || CHAT_ID;
+  const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify({ chat_id: targetChat, text: text, parse_mode: "Markdown" }),
+    muteHttpExceptions: true
+  };
+  const response = UrlFetchApp.fetch(url, options);
+  const result = JSON.parse(response.getContentText());
+  if (result.ok) return { ok: true };
+  if (result.error_code === 400 && result.description && result.description.indexOf("upgraded to a supergroup") !== -1) {
+    const newId = result.parameters && result.parameters.migrate_to_chat_id;
+    return { ok: false, message: "Группа обновлена в супергруппу.\n\nНовый ID: " + newId + "\n\nОбнови CHAT_ID_GROUP2 в Code.gs (строка 4)." };
+  }
+  return { ok: false, message: "Ошибка Telegram: " + (result.description || result) };
+}
+
+// --- ТЕСТЫ ОТПРАВКИ (меню при открытии таблицы) ---
+
+/**
+ * Создаёт меню «ТЕСТ БОТА» при открытии таблицы.
+ * ВАЖНО: Удали функцию onOpen() из отдельного тестового файла, иначе меню будет дублироваться.
+ */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("🚀 ТЕСТ БОТА")
+    .addItem("Отправить тестовый отчет", "testTelegramReport")
+    .addSeparator()
+    .addItem("📤 Группа 1 (по умолчанию)", "testSendToGroup1")
+    .addItem("📤 Группа 2", "testSendToGroup2")
+    .addItem("📤 В обе группы", "testSendToBothGroups")
+    .addToUi();
+}
+
+/**
+ * Тестовый отчёт (как из приложения) — отправка в CHAT_ID по умолчанию.
+ */
+function testTelegramReport() {
+  const dateStr = new Date().toLocaleDateString("ru-RU");
+  const testMessage =
+    "🧪 *ТЕСТОВЫЙ ОТЧЕТ*\n" +
+    "📅 Дата: " + dateStr + "\n" +
+    "--------------------------\n" +
+    "• Арматура 10мм: *150 кг*\n" +
+    "• Бетон B25: *12 м3*\n" +
+    "• Кирпич: *500 шт*\n" +
+    "--------------------------\n" +
+    "✅ Связь с таблицей установлена!";
+  try {
+    sendToTelegram(testMessage, CHAT_ID);
+    SpreadsheetApp.getUi().alert("✅ Успешно! Проверь группу в Telegram.");
+  } catch (e) {
+    SpreadsheetApp.getUi().alert("❌ Ошибка: " + e.toString());
+  }
+}
+
+/** Тест: отправка в группу 1 (CHAT_ID). */
+function testSendToGroup1() {
+  const msg = "🧪 *ТЕСТ* — группа 1\n" + Utilities.formatDate(new Date(), "GMT+3", "dd.MM.yyyy HH:mm");
+  try {
+    sendToTelegram(msg, CHAT_ID);
+    SpreadsheetApp.getUi().alert("Отправлено в группу 1: " + CHAT_ID);
+  } catch (e) {
+    SpreadsheetApp.getUi().alert("Ошибка: " + e.toString());
+  }
+}
+
+/** Тест: отправка в группу 2 (CHAT_ID_GROUP2). */
+function testSendToGroup2() {
+  const msg = "🧪 *ТЕСТ* — группа 2\n" + Utilities.formatDate(new Date(), "GMT+3", "dd.MM.yyyy HH:mm");
+  const result = sendToTelegramWithMigrateCheck(msg, CHAT_ID_GROUP2);
+  if (result.ok) {
+    SpreadsheetApp.getUi().alert("Отправлено в группу 2: " + CHAT_ID_GROUP2);
+  } else {
+    SpreadsheetApp.getUi().alert(result.message);
+  }
+}
+
+/** Тест: отправка в обе группы. */
+function testSendToBothGroups() {
+  const msg = "🧪 *ТЕСТ* — обе группы\n" + Utilities.formatDate(new Date(), "GMT+3", "dd.MM.yyyy HH:mm");
+  const results = [];
+  try {
+    sendToTelegram(msg, CHAT_ID);
+    results.push("Группа 1: OK");
+  } catch (e) {
+    results.push("Группа 1: " + e.toString());
+  }
+  const r2 = sendToTelegramWithMigrateCheck(msg, CHAT_ID_GROUP2);
+  results.push(r2.ok ? "Группа 2: OK" : "Группа 2: " + r2.message);
+  SpreadsheetApp.getUi().alert(results.join("\n"));
 }

@@ -1,22 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'src/core/config/supabase_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'src/presentation/screens/home_screen.dart';
 import 'src/application/providers/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (SupabaseConfig.isEnabled) {
-    try {
-      await Supabase.initialize(
-        url: SupabaseConfig.url,
-        anonKey: SupabaseConfig.anonKey,
-      );
-    } catch (_) {
-      // Продолжаем без Supabase — всё пойдёт через GAS
-    }
-  }
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -35,64 +24,82 @@ class MyApp extends ConsumerWidget {
       title: 'Отчет',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      // Светлая тема (Строгая черно-белая)
+      // Светлая тема (WhatsApp-style зелёный акцент)
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.black,
+          seedColor: const Color(0xFF128C7E),
           brightness: Brightness.light,
-          primary: Colors.black,
+          primary: const Color(0xFF128C7E),
           onPrimary: Colors.white,
           surface: Colors.white,
-          onSurface: Colors.black,
+          onSurface: Colors.black87,
           outline: Colors.grey[300],
         ),
-        scaffoldBackgroundColor: const Color(0xFFF0F0F0), // Светло-серый фон для ЧБ неоморфизма
-        appBarTheme: const AppBarTheme(
+        scaffoldBackgroundColor: const Color(0xFFF0F2F5),
+        textTheme: GoogleFonts.libreBaskervilleTextTheme(),
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.transparent,
-          foregroundColor: Colors.black,
+          foregroundColor: Colors.black87,
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
-            color: Colors.black,
+            color: Colors.black87,
             fontSize: 16,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
+            backgroundColor: const Color(0xFF25D366),
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(56),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
-            elevation: 8,
-            shadowColor: Colors.black.withValues(alpha: 0.3),
+            elevation: 0,
           ),
         ),
         cardTheme: CardThemeData(
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: Colors.grey[200]!, width: 1),
           ),
           color: Colors.white,
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFF128C7E), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+        splashFactory: InkRipple.splashFactory,
       ),
-      // Темная тема (Строгая черно-белая)
+      // Тёмная тема (WhatsApp-style зелёный акцент)
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: const ColorScheme.dark(
-          primary: Colors.white,
+          primary: Color(0xFF00A884),
           onPrimary: Colors.black,
-          surface: Colors.black,
+          surface: Color(0xFF111B21),
           onSurface: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFF121212),
+        scaffoldBackgroundColor: const Color(0xFF111B21),
+        textTheme: GoogleFonts.libreBaskervilleTextTheme(ThemeData.dark().textTheme),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
@@ -101,17 +108,17 @@ class MyApp extends ConsumerWidget {
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 16,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.5,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+            backgroundColor: const Color(0xFF00A884),
+            foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(56),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
             elevation: 0,
           ),
@@ -119,10 +126,26 @@ class MyApp extends ConsumerWidget {
         cardTheme: CardThemeData(
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: Colors.grey[800]!, width: 1),
           ),
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFF202C33),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: Colors.grey[700]!, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFF00A884), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
       home: const HomeScreen(),
