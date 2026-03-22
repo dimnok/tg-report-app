@@ -183,24 +183,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             // Горизонтальные табы
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 0, 16),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(
-                    tabs.length,
-                    (index) => _TabChip(
-                      label: tabs[index].label,
-                      isSelected: _selectedTabIndex == index,
-                      onTap: () {
-                        setState(() => _selectedTabIndex = index);
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      isDark: isDark,
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
+              child: Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : const Color(0xFFEEEEEE),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(
+                        tabs.length,
+                        (index) => _TabChip(
+                          label: tabs[index].label,
+                          isSelected: _selectedTabIndex == index,
+                          onTap: () {
+                            setState(() => _selectedTabIndex = index);
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          isDark: isDark,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -291,32 +301,42 @@ class _TabChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (isDark ? _whatsappGreen : _whatsappTeal)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? (isDark ? _whatsappGreen : _whatsappTeal)
-                  : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? Colors.grey[700] : Colors.white)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 3),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 2,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected 
+                ? (isDark ? Colors.white : Colors.black) 
+                : (isDark ? Colors.grey[400] : Colors.black87),
           ),
         ),
       ),
@@ -342,8 +362,12 @@ class _FeaturedCard extends StatelessWidget {
     final (String title, String subtitle, List<String> bullets) = switch (tab.id) {
       'report' => (
           'Сформировать отчёт',
-          'Выберите объект и заполните позиции',
-          ['Выбор объекта и системы', 'Заполнение позиций', 'Отправка отчёта'],
+          '⚠️ ВАЖНЫЕ ПРАВИЛА ПРИ ПОДАЧЕ:',
+          [
+            '❗️ Внимательно проверяйте наименование работ',
+            '❗️ Обращайте внимание на единицы измерения',
+            '❗️ Будьте предельно точны при подаче объёмов',
+          ],
         ),
       'production' => (
           'Просмотреть выработку',

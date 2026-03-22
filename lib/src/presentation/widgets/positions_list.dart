@@ -5,10 +5,10 @@ import '../../application/providers/report_providers.dart';
 import '../../domain/models/position_model.dart';
 
 /// Список доступных позиций для формирования отчета.
-/// 
+///
 /// Отрисовывает карточки позиций с возможностью изменения их количества.
 class PositionsList extends ConsumerWidget {
-// ...
+  // ...
   final List<PositionModel> positions;
   const PositionsList({super.key, required this.positions});
 
@@ -53,13 +53,16 @@ class PositionsList extends ConsumerWidget {
             child: Row(
               children: [
                 Expanded(
+                  flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         item.name,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: quantity > 0
                               ? FontWeight.bold
                               : FontWeight.w500,
@@ -77,7 +80,11 @@ class PositionsList extends ConsumerWidget {
                     ],
                   ),
                 ),
-                _QuantityPicker(id: item.id, quantity: quantity),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 116,
+                  child: _QuantityPicker(id: item.id, quantity: quantity),
+                ),
               ],
             ),
           ),
@@ -141,35 +148,33 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      height: 36,
       decoration: BoxDecoration(
-        color: widget.quantity > 0
-            ? primary.withValues(alpha: 0.08)
-            : (isDark ? Colors.black : Colors.white),
-        borderRadius: BorderRadius.circular(14),
+        color: isDark ? Colors.grey[900] : Colors.grey[100],
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: widget.quantity > 0
-              ? primary.withValues(alpha: 0.5)
-              : (isDark ? Colors.grey[800]! : Colors.grey[200]!),
-          width: widget.quantity > 0 ? 1.5 : 0.5,
+          color: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+          width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _CircleButton(
+          _ActionButton(
             icon: Icons.remove,
             onPressed: widget.quantity > 0
-                ? () => ref
-                      .read(reportNotifierProvider.notifier)
-                      .updateQuantity(widget.id, -1)
+                ? () {
+                    FocusScope.of(context).unfocus();
+                    ref.read(reportNotifierProvider.notifier).updateQuantity(widget.id, -1);
+                  }
                 : null,
           ),
-          Container(
-            constraints: const BoxConstraints(minWidth: 48),
-            child: IntrinsicWidth(
+          Expanded(
+            child: Container(
+              height: double.infinity,
+              alignment: Alignment.center,
               child: TextField(
                 controller: _controller,
                 keyboardType: TextInputType.number,
@@ -177,10 +182,6 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
                 onChanged: _onManualInput,
                 onTap: () {
                   setState(() => _isEditing = true);
-                  _controller.selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: _controller.text.length,
-                  );
                 },
                 onSubmitted: (_) => setState(() => _isEditing = false),
                 onTapOutside: (_) {
@@ -190,15 +191,18 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  filled: false,
+                  hoverColor: Colors.transparent,
                 ),
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontSize: widget.quantity.toString().length > 3 ? 12 : 14,
+                  fontWeight: FontWeight.w600,
                   color: widget.quantity > 0
                       ? (isDark ? Colors.white : Colors.black)
                       : Colors.grey[500],
@@ -206,11 +210,12 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
               ),
             ),
           ),
-          _CircleButton(
+          _ActionButton(
             icon: Icons.add,
-            onPressed: () => ref
-                .read(reportNotifierProvider.notifier)
-                .updateQuantity(widget.id, 1),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              ref.read(reportNotifierProvider.notifier).updateQuantity(widget.id, 1);
+            },
           ),
         ],
       ),
@@ -218,10 +223,10 @@ class _QuantityPickerState extends ConsumerState<_QuantityPicker> {
   }
 }
 
-class _CircleButton extends StatelessWidget {
+class _ActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
-  const _CircleButton({required this.icon, this.onPressed});
+  const _ActionButton({required this.icon, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -230,19 +235,19 @@ class _CircleButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(8),
+        borderRadius: BorderRadius.circular(18),
+        child: SizedBox(
+          width: 36,
+          height: 36,
           child: Icon(
             icon,
-            size: 18,
+            size: 20,
             color: onPressed != null
-                ? (isDark ? Colors.white : Colors.black)
-                : Colors.grey[isDark ? 800 : 300],
+                ? (isDark ? Colors.white : Colors.black87)
+                : Colors.grey[isDark ? 700 : 400],
           ),
         ),
       ),
     );
   }
 }
-
