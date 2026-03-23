@@ -252,6 +252,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               ),
             ),
+            // Подвал с информацией о разработчике и собственнике
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Собственность ООО ГТ ИНЖИНИРИНГ',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'Разработчик Тельнов Д.',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -12,7 +12,8 @@ abstract class ReportRepository {
   Future<InitialData> getData(String userId, {String? objectId});
 
   /// Получает суммарную выработку по всем позициям.
-  Future<List<ProductionItem>> getProductionData(String userId);
+  /// Если указан [contractor] и пользователь является админом, возвращает выработку подрядчика.
+  Future<List<ProductionItem>> getProductionData(String userId, {String? contractor});
 
   /// Отправляет список выбранных позиций [items] от имени пользователя [userId]
   /// для конкретного объекта [objectId] с именем [objectName].

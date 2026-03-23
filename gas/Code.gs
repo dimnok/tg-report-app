@@ -124,71 +124,121 @@ function doGet(e) {
     return getEconomyData();
   }
 
-  const hPos = getHeaders("Positions");
-
-  // --- ВЫРАБОТКА (БРИГАДНЫЙ МЕТОД) ---
+  // --- ВЫРАБОТКА (ЛИЧНАЯ ИЛИ ПО ПРЕДПРИЯТИЮ ДЛЯ АДМИНА) ---
   if (action === "getProduction") {
-    const hUsers = getHeaders("Users");
-    const teamUserIds = hUsers.data.slice(1)
-      .filter(row => row[hUsers.map["contractor"]] === access.contractor)
-      .map(row => row[hUsers.map["id"]].toString());
+    try {
+      const targetContractor = e?.parameter?.contractor;
+      const hDataV2 = getHeaders("Data_v2");
+      const hPos = getHeaders("Positions");
+      const hObj = getHeaders("Objects");
+      const hUsers = getHeaders("Users");
 
-    const hDataV2 = getHeaders("Data_v2");
-    const stats = {};
+      let targetUserIds = [];
 
-    hDataV2.data.slice(1).forEach(row => {
-      const rowUserId = row[hDataV2.map["user_id"]];
-      if (teamUserIds.includes(rowUserId ? rowUserId.toString() : "")) {
-        const pId = row[hDataV2.map["position_id"]];
-        const qty = parseFloat(row[hDataV2.map["qty"]] || 0);
-        stats[pId] = (stats[pId] || 0) + qty;
+      if (targetContractor && access.role === "admin") {
+        // Ищем всех пользователей этого подрядчика
+        targetUserIds = hUsers.data.slice(1)
+          .filter(row => row[hUsers.map["contractor"]] === targetContractor)
+          .map(row => {
+            const id = row[hUsers.map["id"]];
+            return id ? id.toString() : "";
+          })
+          .filter(id => id !== "");
+      } else {
+        // Только свои данные
+        targetUserIds = [userId.toString()];
       }
-    });
 
-    const nameMap = {};
-    const pIdIdx = hPos.map["id"];
-    const pNameIdx = hPos.map["наименование"] ?? hPos.map["name"];
-    const pUnitIdx = hPos.map["unit"] ?? hPos.map["ед. изм."];
+      const stats = {};
 
-    hPos.data.slice(1).forEach(row => {
-      const id = row[pIdIdx];
-      if (id) nameMap[id] = { n: row[pNameIdx], u: row[pUnitIdx] };
-    });
+      if (hDataV2 && hDataV2.data) {
+        hDataV2.data.slice(1).forEach(row => {
+          const rowUserId = row[hDataV2.map["user_id"]];
+          if (rowUserId && targetUserIds.includes(rowUserId.toString())) {
+            const pId = row[hDataV2.map["position_id"]];
+            const oId = row[hDataV2.map["object_id"]];
+            const sys = row[hDataV2.map["system"]] || "Без системы";
+            const qty = parseFloat(row[hDataV2.map["qty"]] || 0);
 
-    const production = Object.keys(stats).map(pId => ({
-      id: pId,
-      name: nameMap[pId]?.n || "Неизвестно",
-      unit: nameMap[pId]?.u || "",
-      total: stats[pId]
-    })).filter(p => p.total > 0);
+            if (pId && oId && qty > 0) {
+              const key = oId + "_" + sys + "_" + pId;
+              if (!stats[key]) {
+                stats[key] = { pId: pId, oId: oId, sys: sys, qty: 0 };
+              }
+              stats[key].qty += qty;
+            }
+          }
+        });
+      }
 
-    return createJsonResponse({ status: "success", data: production });
+      const posMap = {};
+      if (hPos && hPos.data) {
+        const pIdIdx = hPos.map["id"];
+        const pNameIdx = hPos.map["наименование"] ?? hPos.map["name"];
+        const pUnitIdx = hPos.map["unit"] ?? hPos.map["ед. изм."];
+
+        hPos.data.slice(1).forEach(row => {
+          const id = row[pIdIdx];
+          if (id) posMap[id] = { n: row[pNameIdx], u: row[pUnitIdx] };
+        });
+      }
+
+      const objMap = {};
+      if (hObj && hObj.data) {
+        const oIdIdx = hObj.map["id"];
+        const oNameIdx = hObj.map["name"];
+        hObj.data.slice(1).forEach(row => {
+          const id = row[oIdIdx];
+          if (id) objMap[id] = row[oNameIdx];
+        });
+      }
+
+      const production = Object.keys(stats).map(key => {
+        const s = stats[key];
+        return {
+          id: s.pId ? s.pId.toString() : "",
+          objectName: objMap[s.oId] || "Неизвестный объект",
+          systemName: s.sys ? s.sys.toString() : "Без системы",
+          name: posMap[s.pId]?.n || "Неизвестно",
+          unit: posMap[s.pId]?.u || "",
+          total: s.qty
+        };
+      }).filter(p => p.total > 0);
+
+      return createJsonResponse({ status: "success", data: production });
+    } catch (err) {
+      return createJsonResponse({ status: "error", message: err.toString() });
+    }
   }
 
   // --- ПОЛУЧЕНИЕ ОБЪЕКТОВ ---
+  let userObjects = [];
   const hAssign = getHeaders("UserAssignments");
   const hObj = getHeaders("Objects");
+  const hPos = getHeaders("Positions");
 
-  const assignedObjectIds = hAssign.data.slice(1)
-    .filter(row => row[hAssign.map["user_id"]] && row[hAssign.map["user_id"]].toString() === userId.toString())
-    .map(row => row[hAssign.map["object_id"]].toString());
+  if (hAssign && hObj) {
+    const assignedObjectIds = hAssign.data.slice(1)
+      .filter(row => row[hAssign.map["user_id"]] && row[hAssign.map["user_id"]].toString() === userId.toString())
+      .map(row => row[hAssign.map["object_id"]].toString());
 
-  const userObjects = hObj.data.slice(1)
-    .filter(row => {
-      const id = row[hObj.map["id"]];
-      const activeIdx = hObj.map["is_active"] ?? hObj.map["active"] ?? hObj.map["активен"];
-      const activeVal = activeIdx !== undefined ? row[activeIdx] : true;
-      const isActive = activeVal === true || activeVal === "TRUE" || activeVal === "active";
-      return assignedObjectIds.includes(id ? id.toString() : "") && isActive;
-    })
-    .map(row => ({
-      id: String(row[hObj.map["id"]]),
-      name: String(row[hObj.map["name"]])
-    }));
+    userObjects = hObj.data.slice(1)
+      .filter(row => {
+        const id = row[hObj.map["id"]];
+        const activeIdx = hObj.map["is_active"] ?? hObj.map["active"] ?? hObj.map["активен"];
+        const activeVal = activeIdx !== undefined ? row[activeIdx] : true;
+        const isActive = activeVal === true || activeVal === "TRUE" || activeVal === "active";
+        return assignedObjectIds.includes(id ? id.toString() : "") && isActive;
+      })
+      .map(row => ({
+        id: String(row[hObj.map["id"]]),
+        name: String(row[hObj.map["name"]])
+      }));
+  }
 
   // --- ПОЛУЧЕНИЕ ПОЗИЦИЙ ---
   let positions = [];
-  if (selectedObjectId) {
+  if (selectedObjectId && hPos) {
     const pIdIdx = hPos.map["id"];
     const pObjIdIdx = hPos.map["object_id"];
     const pNameIdx = hPos.map["наименование"] ?? hPos.map["name"];

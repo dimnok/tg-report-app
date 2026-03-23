@@ -9,6 +9,10 @@ abstract class ProductionItem with _$ProductionItem {
   const factory ProductionItem({
     /// ID позиции.
     required String id,
+    /// Наименование объекта.
+    @Default('') String objectName,
+    /// Наименование подсистемы.
+    @Default('') String systemName,
     /// Наименование позиции.
     required String name,
     /// Единица измерения.

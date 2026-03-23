@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 mixin _$ProductionItem {
 
 /// ID позиции.
- String get id;/// Наименование позиции.
+ String get id;/// Наименование объекта.
+ String get objectName;/// Наименование подсистемы.
+ String get systemName;/// Наименование позиции.
  String get name;/// Единица измерения.
  String get unit;/// Суммарное количество за все время.
  double get total;
@@ -32,16 +34,16 @@ $ProductionItemCopyWith<ProductionItem> get copyWith => _$ProductionItemCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductionItem&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.total, total) || other.total == total));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductionItem&&(identical(other.id, id) || other.id == id)&&(identical(other.objectName, objectName) || other.objectName == objectName)&&(identical(other.systemName, systemName) || other.systemName == systemName)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.total, total) || other.total == total));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unit,total);
+int get hashCode => Object.hash(runtimeType,id,objectName,systemName,name,unit,total);
 
 @override
 String toString() {
-  return 'ProductionItem(id: $id, name: $name, unit: $unit, total: $total)';
+  return 'ProductionItem(id: $id, objectName: $objectName, systemName: $systemName, name: $name, unit: $unit, total: $total)';
 }
 
 
@@ -52,7 +54,7 @@ abstract mixin class $ProductionItemCopyWith<$Res>  {
   factory $ProductionItemCopyWith(ProductionItem value, $Res Function(ProductionItem) _then) = _$ProductionItemCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String unit, double total
+ String id, String objectName, String systemName, String name, String unit, double total
 });
 
 
@@ -69,9 +71,11 @@ class _$ProductionItemCopyWithImpl<$Res>
 
 /// Create a copy of ProductionItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? total = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? objectName = null,Object? systemName = null,Object? name = null,Object? unit = null,Object? total = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,objectName: null == objectName ? _self.objectName : objectName // ignore: cast_nullable_to_non_nullable
+as String,systemName: null == systemName ? _self.systemName : systemName // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
@@ -160,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  double total)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String objectName,  String systemName,  String name,  String unit,  double total)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductionItem() when $default != null:
-return $default(_that.id,_that.name,_that.unit,_that.total);case _:
+return $default(_that.id,_that.objectName,_that.systemName,_that.name,_that.unit,_that.total);case _:
   return orElse();
 
 }
@@ -181,10 +185,10 @@ return $default(_that.id,_that.name,_that.unit,_that.total);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String unit,  double total)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String objectName,  String systemName,  String name,  String unit,  double total)  $default,) {final _that = this;
 switch (_that) {
 case _ProductionItem():
-return $default(_that.id,_that.name,_that.unit,_that.total);case _:
+return $default(_that.id,_that.objectName,_that.systemName,_that.name,_that.unit,_that.total);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +205,10 @@ return $default(_that.id,_that.name,_that.unit,_that.total);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String unit,  double total)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String objectName,  String systemName,  String name,  String unit,  double total)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductionItem() when $default != null:
-return $default(_that.id,_that.name,_that.unit,_that.total);case _:
+return $default(_that.id,_that.objectName,_that.systemName,_that.name,_that.unit,_that.total);case _:
   return null;
 
 }
@@ -216,11 +220,15 @@ return $default(_that.id,_that.name,_that.unit,_that.total);case _:
 @JsonSerializable()
 
 class _ProductionItem implements ProductionItem {
-  const _ProductionItem({required this.id, required this.name, required this.unit, required this.total});
+  const _ProductionItem({required this.id, this.objectName = '', this.systemName = '', required this.name, required this.unit, required this.total});
   factory _ProductionItem.fromJson(Map<String, dynamic> json) => _$ProductionItemFromJson(json);
 
 /// ID позиции.
 @override final  String id;
+/// Наименование объекта.
+@override@JsonKey() final  String objectName;
+/// Наименование подсистемы.
+@override@JsonKey() final  String systemName;
 /// Наименование позиции.
 @override final  String name;
 /// Единица измерения.
@@ -241,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductionItem&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.total, total) || other.total == total));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductionItem&&(identical(other.id, id) || other.id == id)&&(identical(other.objectName, objectName) || other.objectName == objectName)&&(identical(other.systemName, systemName) || other.systemName == systemName)&&(identical(other.name, name) || other.name == name)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.total, total) || other.total == total));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unit,total);
+int get hashCode => Object.hash(runtimeType,id,objectName,systemName,name,unit,total);
 
 @override
 String toString() {
-  return 'ProductionItem(id: $id, name: $name, unit: $unit, total: $total)';
+  return 'ProductionItem(id: $id, objectName: $objectName, systemName: $systemName, name: $name, unit: $unit, total: $total)';
 }
 
 
@@ -261,7 +269,7 @@ abstract mixin class _$ProductionItemCopyWith<$Res> implements $ProductionItemCo
   factory _$ProductionItemCopyWith(_ProductionItem value, $Res Function(_ProductionItem) _then) = __$ProductionItemCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String unit, double total
+ String id, String objectName, String systemName, String name, String unit, double total
 });
 
 
@@ -278,9 +286,11 @@ class __$ProductionItemCopyWithImpl<$Res>
 
 /// Create a copy of ProductionItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? unit = null,Object? total = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? objectName = null,Object? systemName = null,Object? name = null,Object? unit = null,Object? total = null,}) {
   return _then(_ProductionItem(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,objectName: null == objectName ? _self.objectName : objectName // ignore: cast_nullable_to_non_nullable
+as String,systemName: null == systemName ? _self.systemName : systemName // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable

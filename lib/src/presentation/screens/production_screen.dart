@@ -4,6 +4,7 @@ import '../../application/providers/report_providers.dart';
 import '../../application/providers/theme_provider.dart';
 import '../../application/utils/excel_exporter.dart';
 import '../../domain/models/production_item.dart';
+import '../../domain/models/initial_data.dart';
 
 class ProductionScreen extends ConsumerStatefulWidget {
   const ProductionScreen({super.key});
@@ -15,13 +16,14 @@ class ProductionScreen extends ConsumerStatefulWidget {
 class _ProductionScreenState extends ConsumerState<ProductionScreen> {
   bool _isExporting = false;
 
-  Future<void> _exportToTelegram(List<ProductionItem> items) async {
+  Future<void> _exportToTelegram(List<ProductionItem> items, String? contractor) async {
     setState(() => _isExporting = true);
     try {
       await ExcelExporter.exportProduction(
         items: items,
         userId: ref.read(userIdProvider),
         repository: ref.read(reportRepositoryProvider),
+        contractor: contractor,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -44,11 +46,53 @@ class _ProductionScreenState extends ConsumerState<ProductionScreen> {
     final productionAsync = ref.watch(productionDataProvider);
     final themeMode = ref.watch(themeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final initialData = ref.watch(initialDataProvider).value;
+    final isAdmin = initialData != null && initialData is AuthorizedData && initialData.role == 'admin';
+    
+    final selectedContractor = ref.watch(selectedContractorProvider);
+
+    Widget? bottom;
+    if (isAdmin) {
+      final contractorsAsync = ref.watch(adminContractorsProvider);
+      bottom = contractorsAsync.when(
+        data: (contractors) {
+          return DropdownButton<String?>(
+            value: selectedContractor,
+            hint: const Text('Моя выработка'),
+            isExpanded: true,
+            underline: const SizedBox(),
+            items: [
+              const DropdownMenuItem(value: null, child: Text('Моя выработка')),
+              ...contractors.map((c) => DropdownMenuItem(value: c, child: Text('Подрядчик: $c'))),
+            ],
+            onChanged: (val) => ref.read(selectedContractorProvider.notifier).select(val),
+          );
+        },
+        loading: () => const LinearProgressIndicator(),
+        error: (error, stackTrace) => const Text('Ошибка загрузки подрядчиков'),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('ВЫРАБОТКА'),
+        bottom: bottom != null ? PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: bottom,
+          ),
+        ),
+      ) : null,
         actions: [
           productionAsync.maybeWhen(
             data: (items) => IconButton(
@@ -62,7 +106,7 @@ class _ProductionScreenState extends ConsumerState<ProductionScreen> {
               tooltip: 'Отправить в Telegram',
               onPressed: (items.isEmpty || _isExporting)
                   ? null
-                  : () => _exportToTelegram(items),
+                  : () => _exportToTelegram(items, selectedContractor),
             ),
             orElse: () => const SizedBox.shrink(),
           ),
@@ -109,7 +153,7 @@ class _ProductionScreenState extends ConsumerState<ProductionScreen> {
             strokeWidth: 2,
           ),
         ),
-        error: (error, _) => Center(
+        error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -166,7 +210,47 @@ class _ProductionCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(Icons.business_rounded, size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        item.objectName,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                if (item.systemName.isNotEmpty && item.systemName != 'Без системы') ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.account_tree_rounded, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          item.systemName,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 8),
                 Text(
                   'ИТОГО ЗА ВСЕ ВРЕМЯ',
                   style: TextStyle(

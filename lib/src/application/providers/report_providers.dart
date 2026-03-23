@@ -113,7 +113,35 @@ final productionDataProvider = FutureProvider<List<ProductionItem>>((
 ) async {
   final repository = ref.watch(reportRepositoryProvider);
   final userId = ref.watch(userIdProvider);
-  return repository.getProductionData(userId);
+  final contractor = ref.watch(selectedContractorProvider);
+  return repository.getProductionData(userId, contractor: contractor);
+});
+
+/// Управляет выбранным подрядчиком для просмотра выработки (только для админа).
+class SelectedContractorNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void select(String? contractor) => state = contractor;
+}
+
+/// Предоставляет выбранного подрядчика для просмотра выработки.
+final selectedContractorProvider =
+    NotifierProvider<SelectedContractorNotifier, String?>(
+      SelectedContractorNotifier.new,
+    );
+
+/// Предоставляет список уникальных подрядчиков для админа.
+final adminContractorsProvider = Provider<AsyncValue<List<String>>>((ref) {
+  final usersAsync = ref.watch(allUsersProvider);
+  return usersAsync.whenData((users) {
+    final contractors = users
+        .map((u) => u.contractor)
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
+    contractors.sort();
+    return contractors;
+  });
 });
 
 /// Управляет состоянием строки поиска.

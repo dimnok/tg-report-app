@@ -73,10 +73,14 @@ class ReportRepositoryImpl implements ReportRepository {
   }
 
   @override
-  Future<List<ProductionItem>> getProductionData(String userId) async {
+  Future<List<ProductionItem>> getProductionData(String userId, {String? contractor}) async {
     try {
+      var query = '$url?userId=$userId&action=getProduction';
+      if (contractor != null) {
+        query += '&contractor=${Uri.encodeComponent(contractor)}';
+      }
       final response = await client
-          .get(Uri.parse('$url?userId=$userId&action=getProduction'))
+          .get(Uri.parse(query))
           .timeout(_requestTimeout, onTimeout: () {
         throw Exception('Превышено время ожидания при загрузке выработки.');
       });
